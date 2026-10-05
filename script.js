@@ -216,7 +216,7 @@
   function renderHistory() {
     const panel = $('#history-panel');
     const list = $('#history-list');
-    panel.hidden = game.history.length === 0;
+    panel.hidden = !game.history.some((round) => round.scores.some((score) => score.points > 0));
     list.replaceChildren();
     [...game.history].reverse().forEach((round) => {
       const item = document.createElement('div'); item.className = 'history-item';
