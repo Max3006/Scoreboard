@@ -95,7 +95,12 @@
 
   function renumberDefaultPlayers(players) {
     players.forEach((player, index) => {
-      if (player.autoName) player.name = `Spieler ${index + 1}`;
+      // The displayed name is the source of truth: preserve custom names and
+      // update generated labels like "Spieler 3" after a deletion.
+      if (/^Spieler\s+\d+$/i.test(String(player.name ?? '').trim())) {
+        player.name = `Spieler ${index + 1}`;
+        player.autoName = true;
+      }
     });
   }
 
