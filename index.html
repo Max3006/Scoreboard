@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f4f6fa">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="description" content="Ein einfacher Punktzähler für Max und seine Spieleabend-Runde.">
+  <title>Scoreboard</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#start" aria-label="Scoreboard Startseite"><span class="brand-mark">S</span><span>Scoreboard</span></a>
+      <div class="top-actions"><span class="privacy"><span aria-hidden="true"></span> Max’ Spieleabend</span><button class="icon-button" id="install-button" type="button" hidden aria-label="App installieren">Installieren</button><button class="icon-button" id="new-game-button" type="button" hidden>Neues Spiel</button></div>
+    </header>
+
+    <section class="view active" id="setup-view" aria-labelledby="setup-title">
+      <div class="hero"><p class="eyebrow">MAX’ RUNDE · SPIELEABEND</p><h1 id="setup-title">Scoreboard</h1><p class="intro">Namen eintragen, Punkte sammeln und den Überblick behalten. Ganz ohne Blockpapier.</p></div>
+      <form id="setup-form" class="panel setup-panel">
+        <div class="section-heading"><div><p class="eyebrow">SCHRITT 1</p><h2>Wer spielt mit?</h2></div><span class="count-badge" id="player-count">2 Spieler</span></div>
+        <div id="player-list" class="player-list"></div>
+        <button class="add-player" id="add-player" type="button"><span aria-hidden="true">＋</span> Spieler hinzufügen</button>
+        <div class="divider"></div>
+        <fieldset class="end-options"><legend>Wann soll Schluss sein?</legend>
+          <label class="choice"><input type="radio" name="end-mode" value="free" checked><span class="choice-card"><span class="choice-icon">∞</span><span><strong>Freies Spiel</strong><small>Ihr entscheidet selbst</small></span><span class="radio-mark"></span></span></label>
+          <label class="choice"><input type="radio" name="end-mode" value="rounds"><span class="choice-card"><span class="choice-icon">↻</span><span><strong>Nach einer Rundenzahl</strong><small>Feste Anzahl spielen</small></span><span class="radio-mark"></span></span></label>
+          <div class="option-detail" id="rounds-detail" hidden><label for="round-limit">Runden insgesamt</label><input id="round-limit" type="number" inputmode="numeric" min="1" max="999" value="7"></div>
+          <label class="choice"><input type="radio" name="end-mode" value="score"><span class="choice-card"><span class="choice-icon">★</span><span><strong>Bei einer Punktzahl</strong><small>Sobald jemand das Ziel erreicht</small></span><span class="radio-mark"></span></span></label>
+          <div class="option-detail" id="score-detail" hidden><label for="score-limit">Punktziel</label><input id="score-limit" type="number" inputmode="numeric" min="1" max="999999" value="500"></div>
+        </fieldset>
+        <fieldset class="winner-options"><legend>Wie gewinnt man?</legend>
+          <label class="choice"><input type="radio" name="winner-rule" value="high" checked><span class="choice-card"><span class="choice-icon">↑</span><span><strong>Die meisten Punkte</strong><small>Der höchste Punktestand gewinnt</small></span><span class="radio-mark"></span></span></label>
+          <label class="choice"><input type="radio" name="winner-rule" value="low"><span class="choice-card"><span class="choice-icon">↓</span><span><strong>Die wenigsten Punkte</strong><small>Der niedrigste Punktestand gewinnt</small></span><span class="radio-mark"></span></span></label>
+        </fieldset>
+        <button class="primary-button start-button" type="submit">Zählen beginnen <span aria-hidden="true">→</span></button>
+      </form>
+      <p class="footnote">Dein Spielstand wird automatisch und privat auf diesem Gerät gespeichert.</p>
+    </section>
+
+    <section class="view" id="game-view" aria-labelledby="game-title" hidden>
+      <div class="game-heading"><div><p class="eyebrow" id="round-label">RUNDE 1</p><h1 id="game-title">Spielstand</h1></div><div class="game-actions"><button class="text-button standings-button" id="show-standings-button" type="button">Rangliste anzeigen</button><button class="text-button" id="edit-game-button" type="button">Spiel bearbeiten</button></div></div>
+      <section class="live-standings" id="live-standings" aria-live="polite" hidden><div class="live-standings-heading"><div><p class="eyebrow">ZWISCHENSTAND</p><h2>Wer liegt vorn?</h2></div><button class="close-ranking" id="close-ranking" type="button" aria-label="Rangliste schließen">×</button></div><ol class="standings-list" id="live-standings-list"></ol><p class="ranking-note" id="ranking-note"></p></section>
+      <section class="winner-banner" id="winner-banner" aria-live="polite" hidden><div class="winner-copy"><p class="eyebrow">SPIELENDE</p><h2 id="winner-title">Gewonnen!</h2><p id="winner-subtitle"></p></div><ol class="standings-list" id="standings-list"></ol><button class="primary-button continue-button" id="continue-game" type="button">Weiterspielen <span aria-hidden="true">→</span></button></section>
+      <div class="score-grid" id="score-grid"></div>
+      <div class="round-card panel">
+        <div class="round-copy"><span class="round-icon">✦</span><div><h2 id="round-card-title">Die nächste Runde?</h2><p>Tragt die Punkte der Reihe nach ein.</p></div></div>
+        <button class="primary-button" id="begin-round" type="button">Runde zählen <span aria-hidden="true">→</span></button>
+      </div>
+      <button class="finish-game-button" id="end-game-button" type="button">Spiel jetzt beenden</button>
+      <div class="history panel" id="history-panel" hidden><div class="section-heading"><div><p class="eyebrow">BISHER GESPIELT</p><h2>Rundenverlauf</h2></div></div><div id="history-list"></div></div>
+      <p class="footnote">Dein Spielstand bleibt auf diesem Gerät gespeichert.</p>
+    </section>
+
+    <section class="view" id="round-view" aria-labelledby="round-title" hidden>
+      <div class="round-topline"><button class="back-button" id="cancel-round" type="button" aria-label="Zurück">←</button><span id="round-step">SPIELER 1 VON 2</span><button class="quiet-button" id="skip-player" type="button">Überspringen</button></div>
+      <div class="entry-wrap"><div class="entry-heading"><p class="eyebrow" id="entry-round-label">RUNDE 1</p><progress class="progress-track" id="progress-bar" value="0" max="100" aria-label="Rundenfortschritt"></progress><p class="eyebrow">JETZT IST DRAN</p><h1 id="round-title">Spielername</h1><p class="entry-subtitle">Wie viele Punkte sind es?</p></div>
+        <div class="number-display" aria-live="polite" aria-label="Eingegebene Punkte"><span id="score-entry">0</span><button id="clear-entry" class="clear-entry" type="button" aria-label="Eingabe löschen">×</button></div>
+        <div class="keypad" id="keypad" aria-label="Zahlenfeld"><button type="button" data-digit="1">1</button><button type="button" data-digit="2">2</button><button type="button" data-digit="3">3</button><button type="button" data-digit="4">4</button><button type="button" data-digit="5">5</button><button type="button" data-digit="6">6</button><button type="button" data-digit="7">7</button><button type="button" data-digit="8">8</button><button type="button" data-digit="9">9</button><button type="button" class="key-muted" data-action="backspace" aria-label="Letzte Ziffer löschen">⌫</button><button type="button" data-digit="0">0</button><button type="button" class="key-muted" data-action="clear" aria-label="Eingabe leeren">C</button></div>
+        <button class="primary-button finish-player" id="finish-player" type="button">Weiter <span aria-hidden="true">→</span></button>
+      </div>
+    </section>
+
+    <section class="view" id="review-view" aria-labelledby="review-title" hidden>
+      <div class="game-heading"><div><p class="eyebrow" id="review-round-label">RUNDE 1 · ÜBERSICHT</p><h1 id="review-title">Alles richtig?</h1><p class="intro">Tippt auf eine Punktzahl, um sie noch zu ändern.</p></div></div>
+      <div class="review-list panel" id="review-list"></div>
+      <button class="primary-button start-button" id="confirm-round" type="button">Runde abschließen <span aria-hidden="true">→</span></button>
+      <button class="secondary-button" id="back-to-entry" type="button">Eingaben fortsetzen</button>
+    </section>
+
+    <footer class="site-footer"><span>Max’ Spieleabend</span><span>Punkte statt Blockpapier.</span></footer>
+  </main>
+  <dialog id="edit-dialog" class="edit-dialog"><form method="dialog" id="edit-form"><div class="dialog-heading"><div><p class="eyebrow">SPIEL ANPASSEN</p><h2>Spieler verwalten</h2></div><button class="icon-button close-dialog" value="cancel" aria-label="Schließen">×</button></div><div id="edit-player-list" class="player-list"></div><button class="add-player" id="edit-add-player" type="button"><span aria-hidden="true">＋</span> Spieler hinzufügen</button><div class="dialog-actions"><button class="secondary-button" value="cancel">Abbrechen</button><button class="primary-button" id="save-edit" value="save">Änderungen speichern</button></div></form></dialog>
+  <dialog id="continue-dialog" class="edit-dialog"><form method="dialog" id="continue-form"><div class="dialog-heading"><div><p class="eyebrow">RUNDE GEHT WEITER</p><h2>Was ist das neue Ziel?</h2></div><button class="icon-button close-dialog" value="cancel" aria-label="Schließen">×</button></div><fieldset class="end-options continue-options"><legend>Weiterzählen bis …</legend>
+    <label class="choice"><input type="radio" name="continue-mode" value="free" checked><span class="choice-card"><span class="choice-icon">∞</span><span><strong>ihr aufhören wollt</strong><small>Freies Weiterspielen</small></span><span class="radio-mark"></span></span></label>
+    <label class="choice"><input type="radio" name="continue-mode" value="rounds"><span class="choice-card"><span class="choice-icon">↻</span><span><strong>noch Runden gespielt sind</strong><small>Eine Anzahl weiterer Runden</small></span><span class="radio-mark"></span></span></label>
+    <div class="option-detail" id="continue-rounds-detail" hidden><label for="continue-round-limit">Weitere Runden</label><input id="continue-round-limit" type="number" inputmode="numeric" min="1" max="999" value="3"></div>
+    <label class="choice"><input type="radio" name="continue-mode" value="score"><span class="choice-card"><span class="choice-icon">★</span><span><strong>jemand das Punktziel erreicht</strong><small>Gesamtpunktzahl seit Spielbeginn</small></span><span class="radio-mark"></span></span></label>
+    <div class="option-detail" id="continue-score-detail" hidden><label for="continue-score-limit">Punktziel gesamt</label><input id="continue-score-limit" type="number" inputmode="numeric" min="1" max="999999999" value="500"></div>
+    </fieldset><div class="dialog-actions"><button class="secondary-button" value="cancel">Doch nicht</button><button class="primary-button" id="confirm-continue" value="continue">Weiterspielen</button></div></form></dialog>
+</body>
+</html>
