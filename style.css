@@ -198,10 +198,14 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
   .intro { font-size: .85rem; }
   .setup-panel { padding: 17px 13px; }
   .choice-card { min-height: 56px; padding: 8px; }
-  .score-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
-  .score-card { padding: 12px 10px; }
-  .score-value { font-size: clamp(1.9rem, 10vw, 2.9rem); }
-  .score-card-bottom { font-size: .63rem; }
+  .score-grid { grid-template-columns: 1fr; gap: 8px; }
+  .score-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0 12px; padding: 13px 16px; }
+  .score-card-top { grid-column: 1; }
+  .score-name { font-size: .95rem; }
+  .score-value { grid-column: 2; grid-row: 1 / span 2; margin: 0; font-size: clamp(2.5rem, 12vw, 3.6rem); }
+  .score-card-bottom { display: none; }
+  .round-copy p { display: none; }
+  .finish-game-button { margin-top: 5px; padding: 4px 8px; font-size: .68rem; }
   .round-card { align-items: stretch; flex-direction: column; padding: 13px; }
   .round-card .primary-button { width: 100%; }
   .game-heading { align-items: flex-start; }
