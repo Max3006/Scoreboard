@@ -16,6 +16,11 @@
     const number = Number(value);
     return Number.isSafeInteger(number) ? Math.min(max, Math.max(min, number)) : fallback;
   };
+  const safeSignedInteger = (value, fallback = 0, min = -MAX_POINTS, max = MAX_POINTS) => {
+    const number = Number(value);
+    return Number.isSafeInteger(number) ? Math.min(max, Math.max(min, number)) : fallback;
+  };
+  const reachedScoreLimit = (total, limit, winnerRule) => winnerRule === 'low' ? total <= limit : total >= limit;
   const defaultPlayers = () => Array.from({ length: 4 }, (_, index) => ({ id: makeId(), name: `Spieler ${index + 1}`, autoName: true, total: 0 }));
 
   function loadGame() {
@@ -30,17 +35,18 @@
         ids.add(id);
         const name = cleanName(player?.name, `Spieler ${index + 1}`);
         const autoName = typeof player?.autoName === 'boolean' ? player.autoName : /^Spieler \d+$/.test(name);
-        return { id, name, autoName, total: safeInteger(player?.total) };
+        return { id, name, autoName, total: safeSignedInteger(player?.total) };
       });
       const endMode = ['free', 'rounds', 'score'].includes(saved.endMode) ? saved.endMode : 'free';
       const winnerRule = saved.winnerRule === 'low' ? 'low' : 'high';
-      const limit = safeInteger(saved.limit, endMode === 'score' ? 500 : 7, 1, 999999);
+      const savedScoreTarget = safeInteger(Math.abs(Number(saved.limit)), 500, 1, 999999);
+      const limit = endMode === 'score' && winnerRule === 'low' ? -savedScoreTarget : safeInteger(saved.limit, 7, 1, 999999);
       const history = Array.isArray(saved.history) ? saved.history.slice(-500).map((round, index) => ({
         round: safeInteger(round?.round, index + 1, 1, 999999),
-        scores: Array.isArray(round?.scores) ? round.scores.filter((item) => players.some((player) => player.id === item?.id)).map((item) => ({ id: item.id, points: safeInteger(item.points) })) : [],
+        scores: Array.isArray(round?.scores) ? round.scores.filter((item) => players.some((player) => player.id === item?.id)).map((item) => ({ id: item.id, points: safeSignedInteger(item.points) })) : [],
       })) : [];
       const finished = saved.finished === true;
-      const inferredReason = endMode === 'rounds' ? 'rounds' : endMode === 'score' && players.some((player) => player.total >= limit) ? 'score' : 'manual';
+      const inferredReason = endMode === 'rounds' ? 'rounds' : endMode === 'score' && players.some((player) => reachedScoreLimit(player.total, limit, winnerRule)) ? 'score' : 'manual';
       const finishReason = ['rounds', 'score', 'manual'].includes(saved.finishReason) ? saved.finishReason : (finished ? inferredReason : null);
       return { players, endMode, winnerRule, limit, roundNumber: safeInteger(saved.roundNumber, history.length + 1, 1, 1000000), history, finished, finishReason };
     } catch {
@@ -216,7 +222,7 @@
   function renderHistory() {
     const panel = $('#history-panel');
     const list = $('#history-list');
-    panel.hidden = !game.history.some((round) => round.scores.some((score) => score.points > 0));
+    panel.hidden = !game.history.some((round) => round.scores.some((score) => score.points !== 0));
     list.replaceChildren();
     [...game.history].reverse().forEach((round) => {
       const item = document.createElement('div'); item.className = 'history-item';
@@ -246,14 +252,14 @@
     $('#round-step').textContent = `SPIELER ${entryIndex + 1} VON ${game.players.length}`;
     $('#entry-round-label').textContent = `RUNDE ${game.roundNumber}`;
     $('#round-title').textContent = player.name;
-    $('#score-entry').textContent = entryValue || '0';
+    $('#score-entry').textContent = entryValue === '-' ? '−0' : entryValue || '0';
     $('#progress-bar').value = (entryIndex / game.players.length) * 100;
     $('#skip-player').textContent = `Überspringen`;
   }
 
   function finishPlayer() {
     if (!game || entryIndex >= game.players.length) return;
-    pendingScores[entryIndex].points = safeInteger(entryValue, 0);
+    pendingScores[entryIndex].points = safeSignedInteger(entryValue, 0);
     entryIndex += 1;
     entryValue = pendingScores[entryIndex] ? String(pendingScores[entryIndex].points || '') : '';
     if (entryIndex >= game.players.length) renderReview(); else renderEntry();
@@ -265,7 +271,7 @@
     game.players.forEach((player, index) => {
       const row = document.createElement('label'); row.className = 'review-row';
       const name = document.createElement('strong'); name.textContent = player.name;
-      const input = document.createElement('input'); input.type = 'number'; input.inputMode = 'numeric'; input.min = '0'; input.max = String(MAX_POINTS); input.step = '1'; input.value = String(pendingScores[index]?.points ?? 0); input.dataset.playerId = player.id; input.setAttribute('aria-label', `Punkte für ${player.name}`);
+      const input = document.createElement('input'); input.type = 'number'; input.inputMode = 'numeric'; input.min = String(-MAX_POINTS); input.max = String(MAX_POINTS); input.step = '1'; input.value = String(pendingScores[index]?.points ?? 0); input.dataset.playerId = player.id; input.setAttribute('aria-label', `Punkte für ${player.name}`);
       const unit = document.createElement('span'); unit.className = 'review-unit'; unit.textContent = 'Punkte';
       row.append(name, input, unit); list.append(row);
     });
@@ -278,16 +284,16 @@
       inputs.find((input) => !input.validity.valid || input.value.trim() === '')?.focus();
       return;
     }
-    const scores = inputs.map((input) => ({ id: input.dataset.playerId, points: safeInteger(input.value) }));
+    const scores = inputs.map((input) => ({ id: input.dataset.playerId, points: safeSignedInteger(input.value) }));
     scores.forEach((score) => {
       const player = game.players.find((candidate) => candidate.id === score.id);
-      if (player) player.total = safeInteger(player.total + score.points);
+      if (player) player.total = safeSignedInteger(player.total + score.points);
     });
     game.history.push({ round: game.roundNumber, scores });
     const justFinishedRound = game.roundNumber;
     game.roundNumber += 1;
     if (game.endMode === 'rounds' && justFinishedRound >= game.limit) { game.finished = true; game.finishReason = 'rounds'; }
-    if (game.endMode === 'score' && game.players.some((player) => player.total >= game.limit)) { game.finished = true; game.finishReason = 'score'; }
+    if (game.endMode === 'score' && game.players.some((player) => reachedScoreLimit(player.total, game.limit, game.winnerRule))) { game.finished = true; game.finishReason = 'score'; }
     pendingScores = [];
     renderGame();
     showView('game-view');
@@ -306,7 +312,7 @@
     event.preventDefault();
     if (!editDraft || editDraft.length < 2) return;
     const oldIds = new Set(game.players.map((player) => player.id));
-    game.players = editDraft.map((player, index) => ({ ...player, name: cleanName(player.name, `Spieler ${index + 1}`), total: safeInteger(player.total) }));
+    game.players = editDraft.map((player, index) => ({ ...player, name: cleanName(player.name, `Spieler ${index + 1}`), total: safeSignedInteger(player.total) }));
     const newIds = new Set(game.players.map((player) => player.id));
     game.history.forEach((round) => {
       round.scores = round.scores.filter((score) => newIds.has(score.id));
@@ -320,6 +326,7 @@
   function startNewGame() {
     if (game) setupPlayers = game.players.map((player) => ({ id: makeId(), name: player.name, autoName: player.autoName === true, total: 0 }));
     if (game) document.querySelector(`input[name="winner-rule"][value="${game.winnerRule}"]`).checked = true;
+    updateScoreTargetBounds();
     toggleLiveStandings(false);
     renderSetupPlayers();
     showView('setup-view');
@@ -334,6 +341,19 @@
     $('#rounds-detail').hidden = input.value !== 'rounds' || !input.checked;
     $('#score-detail').hidden = input.value !== 'score' || !input.checked;
   }));
+  function updateScoreTargetBounds() {
+    const lowestWins = $('input[name="winner-rule"]:checked').value === 'low';
+    const field = $('#score-limit');
+    field.min = lowestWins ? '-999999' : '1';
+    field.max = lowestWins ? '-1' : '999999';
+    const current = Number(field.value);
+    if (lowestWins && current >= 0) field.value = String(-(current || 500));
+    if (!lowestWins && current <= 0) field.value = String(Math.abs(current) || 500);
+    $('#score-detail label').textContent = lowestWins ? 'Negatives Punktziel' : 'Punktziel';
+  }
+  document.querySelectorAll('input[name="winner-rule"]').forEach((input) => input.addEventListener('change', updateScoreTargetBounds));
+  updateScoreTargetBounds();
+
   $('#setup-form').addEventListener('submit', (event) => {
     event.preventDefault();
     if (setupPlayers.length < 2) return;
@@ -341,7 +361,7 @@
     const limitInput = mode === 'rounds' ? $('#round-limit') : $('#score-limit');
     if (mode !== 'free' && !limitInput.validity.valid) { limitInput.focus(); return; }
     const winnerRule = $('input[name="winner-rule"]:checked').value;
-    game = { players: setupPlayers.map((player, index) => ({ id: player.id, name: cleanName(player.name, `Spieler ${index + 1}`), autoName: player.autoName === true, total: 0 })), endMode: mode, winnerRule, limit: mode === 'free' ? 0 : safeInteger(limitInput.value, 1, 1, 999999), roundNumber: 1, history: [], finished: false, finishReason: null };
+    game = { players: setupPlayers.map((player, index) => ({ id: player.id, name: cleanName(player.name, `Spieler ${index + 1}`), autoName: player.autoName === true, total: 0 })), endMode: mode, winnerRule, limit: mode === 'free' ? 0 : (mode === 'score' && winnerRule === 'low' ? safeSignedInteger(limitInput.value, -500, -999999, -1) : safeInteger(limitInput.value, 1, 1, 999999)), roundNumber: 1, history: [], finished: false, finishReason: null };
     renderGame(); showView('game-view');
   });
   $('#begin-round').addEventListener('click', beginRound);
@@ -352,7 +372,9 @@
     const roundsInput = $('#continue-round-limit');
     const scoreInput = $('#continue-score-limit');
     roundsInput.value = '3';
-    scoreInput.value = String(Math.min(MAX_POINTS, Math.max(...game.players.map((player) => player.total), 0) + 100));
+    scoreInput.min = game.winnerRule === 'low' ? String(-MAX_POINTS) : '1';
+    scoreInput.max = game.winnerRule === 'low' ? '-1' : String(MAX_POINTS);
+    scoreInput.value = String(game.winnerRule === 'low' ? Math.max(-MAX_POINTS, Math.min(...game.players.map((player) => player.total)) - 100) : Math.min(MAX_POINTS, Math.max(...game.players.map((player) => player.total), 0) + 100));
     document.querySelector('input[name="continue-mode"][value="free"]').checked = true;
     $('#continue-rounds-detail').hidden = true;
     $('#continue-score-detail').hidden = true;
@@ -371,7 +393,7 @@
     game.endMode = mode;
     if (mode === 'free') game.limit = 0;
     if (mode === 'rounds') game.limit = game.roundNumber - 1 + safeInteger($('#continue-round-limit').value, 3, 1, 999);
-    if (mode === 'score') game.limit = safeInteger($('#continue-score-limit').value, 500, 1, MAX_POINTS);
+    if (mode === 'score') game.limit = game.winnerRule === 'low' ? safeSignedInteger($('#continue-score-limit').value, -100, -MAX_POINTS, -1) : safeInteger($('#continue-score-limit').value, 500, 1, MAX_POINTS);
     game.finished = false;
     game.finishReason = null;
     $('#continue-dialog').close();
@@ -384,14 +406,16 @@
   $('#keypad').addEventListener('click', (event) => {
     const button = event.target.closest('button'); if (!button) return;
     if (button.dataset.digit !== undefined) {
-      if (entryValue.length < String(MAX_POINTS).length) entryValue = `${entryValue}${button.dataset.digit}`.replace(/^0+(?=\d)/, '');
+      const digits = entryValue.replace('-', '');
+      if (digits.length < String(MAX_POINTS).length) entryValue = `${entryValue}${button.dataset.digit}`.replace(/^-?0+(?=\d)/, (match) => match.startsWith('-') ? '-' : '');
     } else if (button.dataset.action === 'backspace') entryValue = entryValue.slice(0, -1);
-    else if (button.dataset.action === 'clear') entryValue = '';
+    else if (button.dataset.action === 'sign') entryValue = entryValue.startsWith('-') ? entryValue.slice(1) : `-${entryValue}`;
     renderEntry();
   });
   document.addEventListener('keydown', (event) => {
     if ($('#round-view').hidden) return;
-    if (/^\d$/.test(event.key) && entryValue.length < String(MAX_POINTS).length) { entryValue = `${entryValue}${event.key}`.replace(/^0+(?=\d)/, ''); renderEntry(); }
+    if (/^\d$/.test(event.key) && entryValue.replace('-', '').length < String(MAX_POINTS).length) { entryValue = `${entryValue}${event.key}`.replace(/^-?0+(?=\d)/, (match) => match.startsWith('-') ? '-' : ''); renderEntry(); }
+    else if ((event.key === '-' || event.key === '+') && !$('#round-view').hidden) { entryValue = entryValue.startsWith('-') ? entryValue.slice(1) : `-${entryValue}`; renderEntry(); }
     else if (event.key === 'Backspace') { entryValue = entryValue.slice(0, -1); renderEntry(); }
     else if (event.key === 'Enter') finishPlayer();
     else if (event.key === 'Escape') { pendingScores = []; renderGame(); showView('game-view'); }
