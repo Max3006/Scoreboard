@@ -16,7 +16,7 @@
     const number = Number(value);
     return Number.isSafeInteger(number) ? Math.min(max, Math.max(min, number)) : fallback;
   };
-  const defaultPlayers = () => Array.from({ length: 4 }, (_, index) => ({ id: makeId(), name: `Spieler ${index + 1}`, total: 0 }));
+  const defaultPlayers = () => Array.from({ length: 4 }, (_, index) => ({ id: makeId(), name: `Spieler ${index + 1}`, autoName: true, total: 0 }));
 
   function loadGame() {
     try {
@@ -28,7 +28,9 @@
       const players = saved.players.map((player, index) => {
         const id = typeof player?.id === 'string' && player.id.length <= 80 && !ids.has(player.id) ? player.id : makeId();
         ids.add(id);
-        return { id, name: cleanName(player?.name, `Spieler ${index + 1}`), total: safeInteger(player?.total) };
+        const name = cleanName(player?.name, `Spieler ${index + 1}`);
+        const autoName = typeof player?.autoName === 'boolean' ? player.autoName : /^Spieler \d+$/.test(name);
+        return { id, name, autoName, total: safeInteger(player?.total) };
       });
       const endMode = ['free', 'rounds', 'score'].includes(saved.endMode) ? saved.endMode : 'free';
       const winnerRule = saved.winnerRule === 'low' ? 'low' : 'high';
@@ -79,7 +81,7 @@
     input.autocomplete = 'off';
     input.value = player.name;
     input.setAttribute('aria-label', `Name für Spieler ${index + 1}`);
-    input.addEventListener('input', () => { player.name = input.value.slice(0, 32); });
+    input.addEventListener('input', () => { player.name = input.value.slice(0, 32); player.autoName = input.value.trim() === ''; });
     const remove = document.createElement('button');
     remove.className = 'remove-player';
     remove.type = 'button';
@@ -91,12 +93,19 @@
     return row;
   }
 
+  function renumberDefaultPlayers(players) {
+    players.forEach((player, index) => {
+      if (player.autoName) player.name = `Spieler ${index + 1}`;
+    });
+  }
+
   function renderSetupPlayers() {
     const list = $('#player-list');
     list.replaceChildren();
     setupPlayers.forEach((player, index) => list.append(makePlayerRow(player, index, (removeIndex) => {
       if (setupPlayers.length <= 2) return;
       setupPlayers.splice(removeIndex, 1);
+      renumberDefaultPlayers(setupPlayers);
       renderSetupPlayers();
     }, setupPlayers.length > 2)));
     $('#player-count').textContent = `${setupPlayers.length} ${setupPlayers.length === 1 ? 'Spieler' : 'Spieler'}`;
@@ -283,7 +292,7 @@
     const list = $('#edit-player-list'); list.replaceChildren();
     editDraft.forEach((player, index) => list.append(makePlayerRow(player, index, (removeIndex) => {
       if (editDraft.length <= 2) return;
-      editDraft.splice(removeIndex, 1); renderEditList();
+      editDraft.splice(removeIndex, 1); renumberDefaultPlayers(editDraft); renderEditList();
     }, editDraft.length > 2)));
     $('#edit-add-player').disabled = editDraft.length >= MAX_PLAYERS;
   }
@@ -304,7 +313,7 @@
   }
 
   function startNewGame() {
-    if (game) setupPlayers = game.players.map((player) => ({ id: makeId(), name: player.name, total: 0 }));
+    if (game) setupPlayers = game.players.map((player) => ({ id: makeId(), name: player.name, autoName: player.autoName === true, total: 0 }));
     if (game) document.querySelector(`input[name="winner-rule"][value="${game.winnerRule}"]`).checked = true;
     toggleLiveStandings(false);
     renderSetupPlayers();
@@ -313,7 +322,7 @@
 
   $('#add-player').addEventListener('click', () => {
     if (setupPlayers.length >= MAX_PLAYERS) return;
-    setupPlayers.push({ id: makeId(), name: `Spieler ${setupPlayers.length + 1}`, total: 0 }); renderSetupPlayers();
+    setupPlayers.push({ id: makeId(), name: `Spieler ${setupPlayers.length + 1}`, autoName: true, total: 0 }); renderSetupPlayers();
     $('#player-list').lastElementChild?.querySelector('input')?.focus();
   });
   document.querySelectorAll('input[name="end-mode"]').forEach((input) => input.addEventListener('change', () => {
@@ -327,7 +336,7 @@
     const limitInput = mode === 'rounds' ? $('#round-limit') : $('#score-limit');
     if (mode !== 'free' && !limitInput.validity.valid) { limitInput.focus(); return; }
     const winnerRule = $('input[name="winner-rule"]:checked').value;
-    game = { players: setupPlayers.map((player, index) => ({ id: player.id, name: cleanName(player.name, `Spieler ${index + 1}`), total: 0 })), endMode: mode, winnerRule, limit: mode === 'free' ? 0 : safeInteger(limitInput.value, 1, 1, 999999), roundNumber: 1, history: [], finished: false, finishReason: null };
+    game = { players: setupPlayers.map((player, index) => ({ id: player.id, name: cleanName(player.name, `Spieler ${index + 1}`), autoName: player.autoName === true, total: 0 })), endMode: mode, winnerRule, limit: mode === 'free' ? 0 : safeInteger(limitInput.value, 1, 1, 999999), roundNumber: 1, history: [], finished: false, finishReason: null };
     renderGame(); showView('game-view');
   });
   $('#begin-round').addEventListener('click', beginRound);
@@ -390,7 +399,7 @@
   });
   $('#edit-add-player').addEventListener('click', () => {
     if (editDraft.length >= MAX_PLAYERS) return;
-    editDraft.push({ id: makeId(), name: `Spieler ${editDraft.length + 1}`, total: 0 }); renderEditList();
+    editDraft.push({ id: makeId(), name: `Spieler ${editDraft.length + 1}`, autoName: true, total: 0 }); renderEditList();
     $('#edit-player-list').lastElementChild?.querySelector('input')?.focus();
   });
   $('#edit-form').addEventListener('submit', (event) => { if (event.submitter?.id === 'save-edit') saveEdit(event); });
