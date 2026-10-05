@@ -314,7 +314,7 @@
   $('#add-player').addEventListener('click', () => {
     if (setupPlayers.length >= MAX_PLAYERS) return;
     setupPlayers.push({ id: makeId(), name: `Spieler ${setupPlayers.length + 1}`, total: 0 }); renderSetupPlayers();
-    $('#player-list input:last-of-type')?.focus();
+    $('#player-list').lastElementChild?.querySelector('input')?.focus();
   });
   document.querySelectorAll('input[name="end-mode"]').forEach((input) => input.addEventListener('change', () => {
     $('#rounds-detail').hidden = input.value !== 'rounds' || !input.checked;
@@ -391,7 +391,7 @@
   $('#edit-add-player').addEventListener('click', () => {
     if (editDraft.length >= MAX_PLAYERS) return;
     editDraft.push({ id: makeId(), name: `Spieler ${editDraft.length + 1}`, total: 0 }); renderEditList();
-    $('#edit-player-list input:last-of-type')?.focus();
+    $('#edit-player-list').lastElementChild?.querySelector('input')?.focus();
   });
   $('#edit-form').addEventListener('submit', (event) => { if (event.submitter?.id === 'save-edit') saveEdit(event); });
 
