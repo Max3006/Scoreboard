@@ -180,7 +180,8 @@
       startCard.style.transform = '';
       startCard.style.gridRow = layout.center;
       startCard.style.gridColumn = layout.center;
-    }\n    scores.append(startCard);
+    }
+    scores.append(startCard);
     const banner = $('#winner-banner');
     banner.hidden = !game.finished;
     $('#end-game-button').hidden = game.finished;
