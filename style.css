@@ -225,3 +225,182 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
   .score-card { padding: 11px 8px; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; } }
+
+
+/* iOS-inspired finish and full-screen score table */
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  color: #1c1c1e;
+  background: #f2f2f7;
+  --ink: #1c1c1e;
+  --muted: #6e6e73;
+  --line: #d8d8dd;
+  --surface: #fff;
+  --blue: #007aff;
+  --blue-dark: #0066d6;
+}
+body { background: #f2f2f7; }
+.topbar {
+  height: 58px;
+  border-color: #dedee3;
+  background: rgba(242, 242, 247, .88);
+  backdrop-filter: saturate(180%) blur(18px);
+  -webkit-backdrop-filter: saturate(180%) blur(18px);
+}
+.brand-mark { border-radius: 11px; background: #007aff; }
+.icon-button, .text-button, .quiet-button, .back-button {
+  border-color: transparent;
+  border-radius: 12px;
+  background: #e5e5ea;
+  color: #007aff;
+}
+.icon-button:hover, .text-button:hover, .quiet-button:hover, .back-button:hover { background: #d7d7dc; }
+.panel, .score-card { border-radius: 18px; }
+.primary-button { border-color: #007aff; border-radius: 14px; background: #007aff; }
+.primary-button:hover { border-color: #0066d6; background: #0066d6; }
+.secondary-button { border-radius: 14px; }
+.home-button, .settings-button { width: 36px; height: 36px; padding: 0; font-size: 1.25rem; line-height: 1; }
+.top-actions { gap: 7px; }
+.app-shell { max-width: 1120px; }
+#game-view.active {
+  width: 100%;
+  max-width: 1160px;
+  min-height: calc(100svh - 58px);
+  display: flex;
+  flex-direction: column;
+  padding: clamp(8px, 1.4vh, 16px) clamp(10px, 2vw, 22px) 14px;
+}
+#game-view .game-heading {
+  flex: 0 0 auto;
+  margin: 0 2px 8px;
+  align-items: center;
+}
+#game-view .game-heading h1 {
+  font-size: clamp(1.08rem, 2.5vw, 1.45rem);
+  letter-spacing: -.035em;
+}
+#game-view .game-heading .eyebrow { margin-bottom: 2px; }
+#game-view .game-actions { max-width: none; }
+#game-view .standings-button { padding: 8px 12px; font-size: .78rem; }
+#game-view .score-grid {
+  width: 100%;
+  height: min(68svh, 680px);
+  min-height: 290px;
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  gap: clamp(5px, 1vw, 12px);
+  margin: 0 auto;
+}
+#game-view .score-card {
+  min-height: 0;
+  padding: clamp(4px, 1.15vw, 14px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(2px, .7vh, 8px);
+  border: 1px solid rgba(60, 60, 67, .13);
+  border-top: 3px solid var(--player);
+  border-radius: clamp(12px, 2vw, 20px);
+  background: rgba(255, 255, 255, .94);
+  box-shadow: 0 3px 14px rgba(28, 28, 30, .06);
+  text-align: center;
+}
+#game-view .score-card-top { justify-content: center; gap: 5px; }
+#game-view .score-dot { width: 7px; height: 7px; }
+#game-view .score-name {
+  max-width: 100%;
+  color: #3a3a3c;
+  font-size: clamp(.56rem, 1.4vw, .88rem);
+}
+#game-view .score-value {
+  max-width: 100%;
+  margin: 0;
+  color: #1c1c1e;
+  font-size: clamp(1rem, 5.7vw, 3.2rem);
+  font-weight: 760;
+  letter-spacing: -.055em;
+  line-height: 1;
+}
+#game-view .score-card-bottom { display: none; }
+#game-view .board-start {
+  grid-column: 2 / 4;
+  grid-row: 2 / 4;
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  padding: clamp(8px, 2vw, 24px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(5px, 1.5vh, 14px);
+  border: 0;
+  border-radius: clamp(18px, 3vw, 30px);
+  background: #007aff;
+  box-shadow: 0 10px 25px rgba(0, 122, 255, .23);
+  color: #fff;
+  text-align: center;
+  white-space: normal;
+}
+#game-view .board-start:hover { background: #006fe8; }
+#game-view .board-start:disabled { background: #aeb3bc; box-shadow: none; cursor: default; }
+.round-start-icon {
+  width: clamp(32px, 6vw, 54px);
+  height: clamp(32px, 6vw, 54px);
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .2);
+  font-size: clamp(1.25rem, 3vw, 2rem);
+  font-weight: 400;
+}
+.round-start-title { font-size: clamp(.8rem, 2vw, 1.2rem); font-weight: 700; line-height: 1.15; }
+.round-start-caption { max-width: 14ch; color: rgba(255,255,255,.8); font-size: clamp(.55rem, 1.2vw, .76rem); line-height: 1.2; }
+#game-view .finish-game-button {
+  flex: 0 0 auto;
+  margin: 4px auto 0;
+  padding: 4px 9px;
+  color: #8e8e93;
+  font-size: .68rem;
+  text-decoration: none;
+}
+#game-view .history { flex: 0 0 auto; margin-top: 8px; padding: 14px 16px; }
+#game-view .live-standings {
+  position: fixed;
+  z-index: 20;
+  top: 50%;
+  left: 50%;
+  width: min(calc(100vw - 28px), 480px);
+  max-height: min(78svh, 650px);
+  overflow: auto;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 24px 80px rgba(28, 28, 30, .22);
+}
+.edit-dialog { border-radius: 22px; box-shadow: 0 24px 70px rgba(28,28,30,.2); }
+.winner-banner { border-radius: 20px; }
+@media (max-width: 600px) {
+  .app-shell { width: 100%; }
+  .topbar { height: 54px; flex: 0 0 54px; padding: 0 13px; }
+  .brand { font-size: .95rem; }
+  .brand-mark { width: 30px; height: 30px; }
+  #game-view.active {
+    min-height: calc(100svh - 54px);
+    padding: 7px 10px 9px;
+  }
+  #game-view .game-heading { margin: 0 2px 7px; }
+  #game-view .score-grid { height: min(69svh, 640px); min-height: 260px; gap: 6px; }
+  #game-view .score-card { padding: 4px; gap: 3px; border-radius: 14px; }
+  #game-view .score-name { font-size: clamp(.54rem, 2.7vw, .78rem); }
+  #game-view .score-value { font-size: clamp(.9rem, 6vw, 1.8rem); }
+  #game-view .round-start-title { font-size: clamp(.76rem, 3.5vw, 1rem); }
+  #game-view .round-start-caption { font-size: clamp(.5rem, 2.3vw, .7rem); }
+  #game-view .finish-game-button { margin-top: 2px; }
+  #game-view .history { margin-top: 12px; }
+  .site-footer { padding: 0 12px; }
+}
+@media (max-height: 520px) {
+  #game-view .score-grid { height: 62svh; min-height: 220px; }
+}
