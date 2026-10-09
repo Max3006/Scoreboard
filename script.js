@@ -75,7 +75,16 @@
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(game)); } catch { /* The app still works if storage is unavailable. */ }
   }
 
+  function setPreferredOrientation(viewId) {
+    if (!window.matchMedia('(max-width: 900px)').matches || !navigator.maxTouchPoints) return;
+    const orientation = screen.orientation;
+    if (!orientation || typeof orientation.lock !== 'function') return;
+    const target = viewId === 'game-view' ? 'landscape' : 'portrait';
+    orientation.lock(target).catch(() => {});
+  }
+
   function showView(viewId) {
+    setPreferredOrientation(viewId);
     views.forEach((view) => {
       const active = view.id === viewId;
       view.hidden = !active;
@@ -143,7 +152,7 @@
     const beginButton = $('#begin-round');
     beginButton.disabled = game.finished;
     beginButton.setAttribute('aria-label', game.finished ? 'Spiel beendet' : `Runde ${game.roundNumber} zählen`);
-    $('#round-card-title').textContent = game.finished ? 'Spiel beendet' : 'Runde zählen';
+    $('#round-card-title').textContent = game.finished ? 'Spiel beendet' : 'Zählen beginnen';
     const scores = $('#score-grid');
     const startCard = beginButton;
     scores.replaceChildren();
