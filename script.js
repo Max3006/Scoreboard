@@ -4,14 +4,15 @@
   const STORAGE_KEY = 'rundenheld.game.v1';
   const MAX_PLAYERS = 12;
   const MAX_POINTS = 999999999;
-  const SEAT_POSITIONS = [[1, 4], [1, 1], [4, 1], [4, 4], [1, 2], [4, 3], [1, 3], [4, 2], [2, 4], [2, 1], [3, 4], [3, 1]];
-  const seatsForCount = (count) => {
-    const corners = SEAT_POSITIONS.slice(0, 4);
-    if (count <= 4) return corners.slice(0, count);
-    const extraSeats = SEAT_POSITIONS.slice(4);
-    const extrasNeeded = count - 4;
-    const selectedExtras = Array.from({ length: extrasNeeded }, (_, index) => extraSeats[Math.floor(index * extraSeats.length / extrasNeeded)]);
-    return [...corners, ...selectedExtras];
+  const BOARD_SEATS = {
+    four: [[1, 2], [1, 1], [2, 1], [2, 2]],
+    eight: [[1, 3], [1, 1], [3, 1], [3, 3], [1, 2], [2, 3], [3, 2], [2, 1]],
+    twelve: [[1, 4], [1, 1], [4, 1], [4, 4], [1, 2], [4, 3], [1, 3], [4, 2], [2, 4], [2, 1], [3, 4], [3, 1]],
+  };
+  const boardLayout = (count) => {
+    if (count <= 4) return { columns: 2, rows: 2, seats: BOARD_SEATS.four.slice(0, count), center: 'overlay' };
+    if (count <= 8) return { columns: 3, rows: 3, seats: BOARD_SEATS.eight.slice(0, count), center: '2 / 3' };
+    return { columns: 4, rows: 4, seats: BOARD_SEATS.twelve.slice(0, count), center: '2 / 4' };
   };
   const $ = (selector, root = document) => root.querySelector(selector);
   const views = ['setup-view', 'game-view', 'round-view', 'review-view'].map((id) => document.getElementById(id));
@@ -80,6 +81,7 @@
       view.hidden = !active;
       view.classList.toggle('active', active);
     });
+    document.body.classList.toggle('game-open', viewId === 'game-view');
     $('#new-game-button').hidden = viewId === 'setup-view';
     $('#edit-game-button').hidden = viewId !== 'game-view' || !game;
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -144,8 +146,11 @@
     const scores = $('#score-grid');
     const startCard = beginButton;
     scores.replaceChildren();
+    const layout = boardLayout(game.players.length);
     scores.dataset.playerCount = String(game.players.length);
-    const seatPositions = seatsForCount(game.players.length);
+    scores.style.gridTemplateColumns = `repeat(${layout.columns}, minmax(0, 1fr))`;
+    scores.style.gridTemplateRows = `repeat(${layout.rows}, minmax(0, 1fr))`;
+    const seatPositions = layout.seats;
     game.players.forEach((player, index) => {
       const card = document.createElement('article');
       card.className = 'score-card';
@@ -160,7 +165,7 @@
       const bottom = document.createElement('div'); bottom.className = 'score-card-bottom'; bottom.textContent = game.history.length ? `${game.history.length} ${game.history.length === 1 ? 'Runde' : 'Runden'} gespielt` : 'Noch keine Punkte';
       card.append(top, total, bottom); scores.append(card);
     });
-    scores.append(startCard);
+    if (layout.center === 'overlay') {\n      startCard.style.gridRow = ''; startCard.style.gridColumn = ''; startCard.style.position = 'absolute'; startCard.style.left = '50%'; startCard.style.top = '50%'; startCard.style.transform = 'translate(-50%, -50%)';\n    } else {\n      startCard.style.position = 'static'; startCard.style.left = ''; startCard.style.top = ''; startCard.style.transform = ''; startCard.style.gridRow = layout.center; startCard.style.gridColumn = layout.center;\n    }\n    scores.append(startCard);
     const banner = $('#winner-banner');
     banner.hidden = !game.finished;
     $('#end-game-button').hidden = game.finished;
