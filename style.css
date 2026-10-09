@@ -716,3 +716,18 @@ body.game-open .top-actions .icon-button {
   #game-view .score-grid[data-player-count="7"] .score-card,
   #game-view .score-grid[data-player-count="8"] .score-card { padding: 5px; }
 }
+
+@media (orientation: landscape) {
+  #game-view .score-grid[data-player-count="5"] .score-card,
+  #game-view .score-grid[data-player-count="6"] .score-card,
+  #game-view .score-grid[data-player-count="7"] .score-card,
+  #game-view .score-grid[data-player-count="8"] .score-card { padding: 5px; }
+}
+@media (orientation: landscape) and (max-height: 520px) {
+  #game-view .score-name { font-size: clamp(.72rem, 3.2vmin, 1.5rem); }
+  #game-view .score-value { font-size: clamp(1.8rem, 13vmin, 4.4rem); }
+  #game-view .score-grid[data-player-count="9"] .score-value,
+  #game-view .score-grid[data-player-count="10"] .score-value,
+  #game-view .score-grid[data-player-count="11"] .score-value,
+  #game-view .score-grid[data-player-count="12"] .score-value { font-size: clamp(1.2rem, 8.5vmin, 3.1rem); }
+}
