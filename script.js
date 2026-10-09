@@ -166,7 +166,21 @@
       const bottom = document.createElement('div'); bottom.className = 'score-card-bottom'; bottom.textContent = game.history.length ? `${game.history.length} ${game.history.length === 1 ? 'Runde' : 'Runden'} gespielt` : 'Noch keine Punkte';
       card.append(top, total, bottom); scores.append(card);
     });
-    if (layout.center === 'overlay') {\n      startCard.style.gridRow = ''; startCard.style.gridColumn = ''; startCard.style.position = 'absolute'; startCard.style.left = '50%'; startCard.style.top = '50%'; startCard.style.transform = 'translate(-50%, -50%)';\n    } else {\n      startCard.style.position = 'static'; startCard.style.left = ''; startCard.style.top = ''; startCard.style.transform = ''; startCard.style.gridRow = layout.center; startCard.style.gridColumn = layout.center;\n    }\n    scores.append(startCard);
+    if (layout.center === 'overlay') {
+      startCard.style.gridRow = '';
+      startCard.style.gridColumn = '';
+      startCard.style.position = 'absolute';
+      startCard.style.left = '50%';
+      startCard.style.top = '50%';
+      startCard.style.transform = 'translate(-50%, -50%)';
+    } else {
+      startCard.style.position = 'static';
+      startCard.style.left = '';
+      startCard.style.top = '';
+      startCard.style.transform = '';
+      startCard.style.gridRow = layout.center;
+      startCard.style.gridColumn = layout.center;
+    }\n    scores.append(startCard);
     const banner = $('#winner-banner');
     banner.hidden = !game.finished;
     $('#end-game-button').hidden = game.finished;
