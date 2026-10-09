@@ -731,3 +731,71 @@ body.game-open .top-actions .icon-button {
   #game-view .score-grid[data-player-count="11"] .score-value,
   #game-view .score-grid[data-player-count="12"] .score-value { font-size: clamp(1.2rem, 8.5vmin, 3.1rem); }
 }
+
+
+/* Tabletop board: spaced, rounded player tiles with a dark surround. */
+body.game-open { background: #151517; }
+body.game-open .app-shell { background: #151517; }
+#game-view.active { background: #151517; }
+#game-view .score-grid {
+  inset: calc(env(safe-area-inset-top) + 48px) calc(env(safe-area-inset-right) + 14px) calc(env(safe-area-inset-bottom) + 14px) calc(env(safe-area-inset-left) + 14px);
+  width: auto;
+  height: auto;
+  gap: clamp(10px, 2.2vmin, 24px);
+  background: transparent;
+}
+#game-view .score-card {
+  border-radius: clamp(18px, 3.5vmin, 34px);
+  box-shadow: 0 8px 28px rgba(0,0,0,.18);
+}
+#game-view .board-start {
+  width: 100%;
+  height: 100%;
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: clamp(20px, 4vmin, 38px);
+  background: #242428;
+  box-shadow: 0 10px 30px rgba(0,0,0,.22);
+}
+#game-view .board-start:hover { background: #303035; }
+#game-view .board-start:disabled { background: #303035; color: rgba(255,255,255,.75); }
+#game-view .round-start-icon { display: none !important; }
+#game-view .round-start-title {
+  display: block !important;
+  font-size: clamp(.84rem, 2.8vmin, 1.35rem);
+  line-height: 1.15;
+}
+#game-view .score-grid[data-player-count="1"] .board-start,
+#game-view .score-grid[data-player-count="2"] .board-start,
+#game-view .score-grid[data-player-count="3"] .board-start,
+#game-view .score-grid[data-player-count="4"] .board-start {
+  width: clamp(120px, 24vmin, 210px);
+  height: clamp(58px, 12vmin, 90px);
+  border-radius: 24px;
+}
+#game-view .score-grid[data-player-count="1"] .round-start-title,
+#game-view .score-grid[data-player-count="2"] .round-start-title,
+#game-view .score-grid[data-player-count="3"] .round-start-title,
+#game-view .score-grid[data-player-count="4"] .round-start-title { display: block !important; }
+
+@media (orientation: portrait) and (max-width: 900px) {
+  /* iPhone Safari cannot lock orientation; rotate the board UI as a landscape fallback. */
+  body.game-open .app-shell {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100dvh;
+    height: 100vw;
+    min-height: 0;
+    max-width: none;
+    margin: 0;
+    transform: rotate(90deg) translateY(-100%);
+    transform-origin: top left;
+  }
+  body.game-open .topbar,
+  body.game-open #game-view.active { position: absolute; }
+}
+@media (orientation: landscape) and (max-width: 900px) {
+  #game-view .score-grid {
+    inset: calc(env(safe-area-inset-top) + 44px) calc(env(safe-area-inset-right) + 18px) calc(env(safe-area-inset-bottom) + 16px) calc(env(safe-area-inset-left) + 18px);
+  }
+}
