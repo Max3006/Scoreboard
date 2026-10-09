@@ -4,6 +4,15 @@
   const STORAGE_KEY = 'rundenheld.game.v1';
   const MAX_PLAYERS = 12;
   const MAX_POINTS = 999999999;
+  const SEAT_POSITIONS = [[1, 4], [1, 1], [4, 1], [4, 4], [1, 2], [4, 3], [1, 3], [4, 2], [2, 4], [2, 1], [3, 4], [3, 1]];
+  const seatsForCount = (count) => {
+    const corners = SEAT_POSITIONS.slice(0, 4);
+    if (count <= 4) return corners.slice(0, count);
+    const extraSeats = SEAT_POSITIONS.slice(4);
+    const extrasNeeded = count - 4;
+    const selectedExtras = Array.from({ length: extrasNeeded }, (_, index) => extraSeats[Math.floor(index * extraSeats.length / extrasNeeded)]);
+    return [...corners, ...selectedExtras];
+  };
   const $ = (selector, root = document) => root.querySelector(selector);
   const views = ['setup-view', 'game-view', 'round-view', 'review-view'].map((id) => document.getElementById(id));
 
@@ -72,6 +81,7 @@
       view.classList.toggle('active', active);
     });
     $('#new-game-button').hidden = viewId === 'setup-view';
+    $('#edit-game-button').hidden = viewId !== 'game-view' || !game;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -131,15 +141,18 @@
     $('#round-card-title').textContent = game.finished ? 'Spiel beendet' : game.history.length ? `Bereit für Runde ${game.roundNumber}?` : 'Bereit für die erste Runde?';
     $('#begin-round').disabled = game.finished;
     const beginButton = $('#begin-round');
-    beginButton.replaceChildren(document.createTextNode(game.finished ? 'Spiel abgeschlossen' : 'Runde zählen'));
-    if (!game.finished) {
-      const arrow = document.createElement('span'); arrow.setAttribute('aria-hidden', 'true'); arrow.textContent = '→'; beginButton.append(arrow);
-    }
+    beginButton.disabled = game.finished;
+    $('#round-card-title').textContent = game.finished ? 'Spiel beendet' : 'Runde zählen';
     const scores = $('#score-grid');
+    const startCard = beginButton;
     scores.replaceChildren();
+    scores.dataset.playerCount = String(game.players.length);
+    const seatPositions = seatsForCount(game.players.length);
     game.players.forEach((player, index) => {
       const card = document.createElement('article');
       card.className = 'score-card';
+      card.style.gridRow = String(seatPositions[index][0]);
+      card.style.gridColumn = String(seatPositions[index][1]);
       card.classList.add(`player-color-${index % 12}`);
       const top = document.createElement('div'); top.className = 'score-card-top';
       const dot = document.createElement('span'); dot.className = 'score-dot'; dot.setAttribute('aria-hidden', 'true');
@@ -149,6 +162,7 @@
       const bottom = document.createElement('div'); bottom.className = 'score-card-bottom'; bottom.textContent = game.history.length ? `${game.history.length} ${game.history.length === 1 ? 'Runde' : 'Runden'} gespielt` : 'Noch keine Punkte';
       card.append(top, total, bottom); scores.append(card);
     });
+    scores.append(startCard);
     const banner = $('#winner-banner');
     banner.hidden = !game.finished;
     $('#end-game-button').hidden = game.finished;
