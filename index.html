@@ -15,7 +15,7 @@
   <main class="app-shell">
     <header class="topbar">
       <a class="brand" href="#start" aria-label="Scoreboard Startseite"><span class="brand-mark">S</span><span>Scoreboard</span></a>
-      <div class="top-actions"><span class="privacy"><span aria-hidden="true"></span> Max’ Spieleabend</span><button class="icon-button" id="install-button" type="button" hidden aria-label="App installieren">Installieren</button><button class="icon-button" id="new-game-button" type="button" hidden>Neues Spiel</button></div>
+      <div class="top-actions"><span class="privacy"><span aria-hidden="true"></span> Max’ Spieleabend</span><button class="icon-button" id="install-button" type="button" hidden aria-label="App installieren">Installieren</button><button class="icon-button home-button" id="new-game-button" type="button" hidden aria-label="Zur Startseite" title="Zur Startseite">⌂</button><button class="icon-button settings-button" id="edit-game-button" type="button" hidden aria-label="Einstellungen" title="Spiel-Einstellungen">⚙</button></div>
     </header>
 
     <section class="view active" id="setup-view" aria-labelledby="setup-title">
@@ -42,14 +42,11 @@
     </section>
 
     <section class="view" id="game-view" aria-labelledby="game-title" hidden>
-      <div class="game-heading"><div><p class="eyebrow" id="round-label">RUNDE 1</p><h1 id="game-title">Spielstand</h1></div><div class="game-actions"><button class="text-button standings-button" id="show-standings-button" type="button">Rangliste anzeigen</button><button class="text-button" id="edit-game-button" type="button">Spiel bearbeiten</button></div></div>
+      <div class="game-heading"><div><p class="eyebrow" id="round-label">RUNDE 1</p><h1 id="game-title">Spielstand</h1></div><div class="game-actions"><button class="text-button standings-button" id="show-standings-button" type="button" aria-label="Rangliste anzeigen">Rangliste</button></div></div>
       <section class="live-standings" id="live-standings" aria-live="polite" hidden><div class="live-standings-heading"><div><p class="eyebrow">ZWISCHENSTAND</p><h2>Wer liegt vorn?</h2></div><button class="close-ranking" id="close-ranking" type="button" aria-label="Rangliste schließen">×</button></div><ol class="standings-list" id="live-standings-list"></ol><p class="ranking-note" id="ranking-note"></p></section>
       <section class="winner-banner" id="winner-banner" aria-live="polite" hidden><div class="winner-copy"><p class="eyebrow">SPIELENDE</p><h2 id="winner-title">Gewonnen!</h2><p id="winner-subtitle"></p></div><ol class="standings-list" id="standings-list"></ol><button class="primary-button continue-button" id="continue-game" type="button">Weiterspielen <span aria-hidden="true">→</span></button></section>
       <div class="score-grid" id="score-grid"></div>
-      <div class="round-card panel">
-        <div class="round-copy"><span class="round-icon">✦</span><div><h2 id="round-card-title">Die nächste Runde?</h2><p>Tragt die Punkte der Reihe nach ein.</p></div></div>
-        <button class="primary-button" id="begin-round" type="button">Runde zählen <span aria-hidden="true">→</span></button>
-      </div>
+      <button class="round-card board-start" id="begin-round" type="button"><span class="round-start-icon" aria-hidden="true">＋</span><span class="round-start-title" id="round-card-title">Runde zählen</span><span class="round-start-caption">Tippen, um Punkte einzutragen</span></button>
       <button class="finish-game-button" id="end-game-button" type="button">Spiel jetzt beenden</button>
       <div class="history panel" id="history-panel" hidden><div class="section-heading"><div><p class="eyebrow">BISHER GESPIELT</p><h2>Rundenverlauf</h2></div></div><div id="history-list"></div></div>
       <p class="footnote">Dein Spielstand bleibt auf diesem Gerät gespeichert.</p>
