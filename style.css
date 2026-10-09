@@ -404,3 +404,28 @@ body { background: #f2f2f7; }
 @media (max-height: 520px) {
   #game-view .score-grid { height: 62svh; min-height: 220px; }
 }
+
+#game-view .score-grid[data-player-count="5"] .score-card,
+#game-view .score-grid[data-player-count="6"] .score-card,
+#game-view .score-grid[data-player-count="7"] .score-card,
+#game-view .score-grid[data-player-count="8"] .score-card { padding: clamp(3px, .8vw, 10px); }
+#game-view .score-grid[data-player-count="5"] .score-value,
+#game-view .score-grid[data-player-count="6"] .score-value,
+#game-view .score-grid[data-player-count="7"] .score-value,
+#game-view .score-grid[data-player-count="8"] .score-value { font-size: clamp(.86rem, 4.7vw, 2.25rem); }
+#game-view .score-grid[data-player-count="5"] .score-name,
+#game-view .score-grid[data-player-count="6"] .score-name,
+#game-view .score-grid[data-player-count="7"] .score-name,
+#game-view .score-grid[data-player-count="8"] .score-name { font-size: clamp(.52rem, 1.2vw, .78rem); }
+#game-view .score-grid[data-player-count="9"] .score-card,
+#game-view .score-grid[data-player-count="10"] .score-card,
+#game-view .score-grid[data-player-count="11"] .score-card,
+#game-view .score-grid[data-player-count="12"] .score-card { padding: clamp(2px, .55vw, 7px); gap: 2px; }
+#game-view .score-grid[data-player-count="9"] .score-value,
+#game-view .score-grid[data-player-count="10"] .score-value,
+#game-view .score-grid[data-player-count="11"] .score-value,
+#game-view .score-grid[data-player-count="12"] .score-value { font-size: clamp(.75rem, 4vw, 1.8rem); }
+#game-view .score-grid[data-player-count="9"] .score-name,
+#game-view .score-grid[data-player-count="10"] .score-name,
+#game-view .score-grid[data-player-count="11"] .score-name,
+#game-view .score-grid[data-player-count="12"] .score-name { font-size: clamp(.48rem, 1.05vw, .68rem); }
