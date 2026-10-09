@@ -660,3 +660,59 @@ body.game-open .top-actions .icon-button {
   body.game-open .topbar .icon-button,
   #game-view .standings-button { width: 28px; height: 28px; }
 }
+
+#game-view .finish-game-button {
+  position: fixed;
+  z-index: 76;
+  top: calc(env(safe-area-inset-top) + 4px);
+  left: 52px;
+  width: 34px;
+  height: 34px;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.24);
+  border-radius: 50%;
+  background: rgba(22,22,24,.34);
+  color: #ff6961;
+  font-size: .78rem;
+  text-decoration: none;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+#game-view .finish-game-button:hover { background: rgba(22,22,24,.55); color: #ff453a; }
+@media (min-width: 601px) {
+  #game-view .score-grid[data-player-count="5"] .score-value,
+  #game-view .score-grid[data-player-count="6"] .score-value,
+  #game-view .score-grid[data-player-count="7"] .score-value,
+  #game-view .score-grid[data-player-count="8"] .score-value { font-size: clamp(2rem, min(11vw, 12vh), 5rem); }
+  #game-view .score-grid[data-player-count="9"] .score-value,
+  #game-view .score-grid[data-player-count="10"] .score-value,
+  #game-view .score-grid[data-player-count="11"] .score-value,
+  #game-view .score-grid[data-player-count="12"] .score-value { font-size: clamp(1.4rem, min(8vw, 10vh), 4rem); }
+}
+@media (max-width: 600px) {
+  #game-view .score-grid[data-player-count="5"] .score-value,
+  #game-view .score-grid[data-player-count="6"] .score-value,
+  #game-view .score-grid[data-player-count="7"] .score-value,
+  #game-view .score-grid[data-player-count="8"] .score-value { font-size: clamp(1.8rem, min(11vw, 12vh), 4rem); }
+  #game-view .score-grid[data-player-count="9"] .score-value,
+  #game-view .score-grid[data-player-count="10"] .score-value,
+  #game-view .score-grid[data-player-count="11"] .score-value,
+  #game-view .score-grid[data-player-count="12"] .score-value { font-size: clamp(1rem, min(7vw, 8vh), 2.7rem); }
+  #game-view .score-grid[data-player-count="5"] .score-name,
+  #game-view .score-grid[data-player-count="6"] .score-name,
+  #game-view .score-grid[data-player-count="7"] .score-name,
+  #game-view .score-grid[data-player-count="8"] .score-name { font-size: clamp(.7rem, 3.4vw, 1.2rem); }
+  #game-view .score-grid[data-player-count="9"] .score-name,
+  #game-view .score-grid[data-player-count="10"] .score-name,
+  #game-view .score-grid[data-player-count="11"] .score-name,
+  #game-view .score-grid[data-player-count="12"] .score-name { font-size: clamp(.56rem, 2.5vw, .9rem); }
+}
+@media (orientation: landscape) {
+  #game-view .score-grid[data-player-count="5"] .score-card,
+  #game-view .score-grid[data-player-count="6"] .score-card,
+  #game-view .score-grid[data-player-count="7"] .score-card,
+  #game-view .score-grid[data-player-count="8"] .score-card { padding: 5px; }
+}
