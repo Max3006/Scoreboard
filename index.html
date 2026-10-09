@@ -8,8 +8,8 @@
   <meta name="description" content="Ein einfacher Punktzähler für Max und seine Spieleabend-Runde.">
   <title>Scoreboard</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="style.css?v=12">
-  <script src="script.js?v=12" defer></script>
+  <link rel="stylesheet" href="style.css?v=13">
+  <script src="script.js?v=13" defer></script>
 </head>
 <body>
   <main class="app-shell">
@@ -46,7 +46,7 @@
       <section class="live-standings" id="live-standings" aria-live="polite" hidden><div class="live-standings-heading"><div><p class="eyebrow">ZWISCHENSTAND</p><h2>Wer liegt vorn?</h2></div><button class="close-ranking" id="close-ranking" type="button" aria-label="Rangliste schließen">×</button></div><ol class="standings-list" id="live-standings-list"></ol><p class="ranking-note" id="ranking-note"></p></section>
       <section class="winner-banner" id="winner-banner" aria-live="polite" hidden><div class="winner-copy"><p class="eyebrow">SPIELENDE</p><h2 id="winner-title">Gewonnen!</h2><p id="winner-subtitle"></p></div><ol class="standings-list" id="standings-list"></ol><button class="primary-button continue-button" id="continue-game" type="button">Weiterspielen <span aria-hidden="true">→</span></button></section>
       <div class="score-grid" id="score-grid"></div>
-      <button class="round-card board-start" id="begin-round" type="button"><span class="round-start-icon" aria-hidden="true">＋</span><span class="round-start-title" id="round-card-title">Runde zählen</span><span class="round-start-caption">Tippen, um Punkte einzutragen</span></button>
+      <button class="round-card board-start" id="begin-round" type="button"><span class="round-start-title" id="round-card-title">Zählen beginnen</span><span class="round-start-caption">Tippen, um Punkte einzutragen</span></button>
       <button class="finish-game-button" id="end-game-button" type="button" aria-label="Spiel jetzt beenden" title="Spiel beenden">■</button>
       <div class="history panel" id="history-panel" hidden><div class="section-heading"><div><p class="eyebrow">BISHER GESPIELT</p><h2>Rundenverlauf</h2></div></div><div id="history-list"></div></div>
       <p class="footnote">Dein Spielstand bleibt auf diesem Gerät gespeichert.</p>
