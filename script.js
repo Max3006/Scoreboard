@@ -138,8 +138,6 @@
   function renderGame() {
     if (!game) return;
     $('#round-label').textContent = game.endMode === 'rounds' ? `RUNDE ${Math.min(game.roundNumber, game.limit)} VON ${game.limit}` : `RUNDE ${game.roundNumber}`;
-    $('#round-card-title').textContent = game.finished ? 'Spiel beendet' : game.history.length ? `Bereit für Runde ${game.roundNumber}?` : 'Bereit für die erste Runde?';
-    $('#begin-round').disabled = game.finished;
     const beginButton = $('#begin-round');
     beginButton.disabled = game.finished;
     $('#round-card-title').textContent = game.finished ? 'Spiel beendet' : 'Runde zählen';
