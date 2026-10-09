@@ -142,6 +142,7 @@
     $('#round-label').textContent = game.endMode === 'rounds' ? `RUNDE ${Math.min(game.roundNumber, game.limit)} VON ${game.limit}` : `RUNDE ${game.roundNumber}`;
     const beginButton = $('#begin-round');
     beginButton.disabled = game.finished;
+    beginButton.setAttribute('aria-label', game.finished ? 'Spiel beendet' : `Runde ${game.roundNumber} zählen`);
     $('#round-card-title').textContent = game.finished ? 'Spiel beendet' : 'Runde zählen';
     const scores = $('#score-grid');
     const startCard = beginButton;
