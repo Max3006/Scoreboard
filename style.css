@@ -833,3 +833,106 @@ body.game-open .app-shell,
     radial-gradient(ellipse at 88% 84%, rgba(10, 132, 255, .16), transparent 36%),
     linear-gradient(135deg, #fff9eb 0%, #f2f8ff 100%);
 }
+
+
+/* The center of the board is the round-start touch zone, not a visible button. */
+#game-view .board-start {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  color: transparent !important;
+}
+#game-view .board-start:hover,
+#game-view .board-start:disabled { background: transparent !important; }
+#game-view .board-start > * { display: none !important; }
+#game-view .score-grid[data-player-count="1"] .board-start,
+#game-view .score-grid[data-player-count="2"] .board-start,
+#game-view .score-grid[data-player-count="3"] .board-start,
+#game-view .score-grid[data-player-count="4"] .board-start {
+  width: clamp(160px, 30vmin, 260px);
+  height: clamp(88px, 20vmin, 160px);
+}
+
+/* Keep Home and Settings on the full-screen score-entry view. */
+body.entry-open {
+  min-height: 100dvh;
+  overflow: hidden;
+  background: #f2f2f7;
+}
+body.entry-open .app-shell {
+  width: 100%;
+  height: 100dvh;
+  min-height: 100dvh;
+  max-width: none;
+  margin: 0;
+  background: #f2f2f7;
+}
+body.entry-open .topbar {
+  position: fixed;
+  z-index: 80;
+  top: env(safe-area-inset-top);
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 50px;
+  padding: 0 14px;
+  border: 0;
+  background: transparent;
+}
+body.entry-open .brand,
+body.entry-open .privacy,
+body.entry-open #install-button { display: none !important; }
+body.entry-open .top-actions { margin-left: auto; gap: 8px; }
+body.entry-open .top-actions .home-button,
+body.entry-open .top-actions .settings-button {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(60,60,67,.12);
+  border-radius: 50%;
+  background: rgba(255,255,255,.88);
+  box-shadow: 0 2px 10px rgba(20,30,50,.08);
+}
+body.entry-open #round-view.active {
+  width: 100%;
+  height: 100dvh;
+  min-height: 100dvh;
+  margin: 0;
+  padding: calc(env(safe-area-inset-top) + 58px) 16px calc(env(safe-area-inset-bottom) + 14px);
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+body.entry-open .round-topline { flex: 0 0 auto; margin-bottom: 6px; }
+body.entry-open .entry-wrap {
+  width: min(100%, 420px);
+  margin: auto;
+  padding: 0 0 4px;
+}
+body.entry-open .progress-track { margin-bottom: 16px; }
+body.entry-open .entry-subtitle { margin: 5px 0 12px; }
+body.entry-open .number-display { height: 62px; margin-bottom: 8px; }
+body.entry-open .keypad { gap: 7px; }
+body.entry-open .keypad button { height: clamp(44px, 7.8dvh, 62px); }
+body.entry-open .finish-player { margin-top: 8px; min-height: 46px; }
+
+@media (display-mode: standalone) {
+  body.entry-open .app-shell,
+  body.entry-open #round-view.active { height: 100dvh; min-height: 100dvh; }
+}
+@media (orientation: landscape) and (max-height: 520px) {
+  body.entry-open #round-view.active { padding-top: calc(env(safe-area-inset-top) + 48px); padding-bottom: calc(env(safe-area-inset-bottom) + 8px); }
+  body.entry-open .round-topline { margin-bottom: 2px; }
+  body.entry-open .entry-wrap { width: min(100%, 520px); }
+  body.entry-open .entry-heading .eyebrow:first-child { margin-bottom: 4px; }
+  body.entry-open .progress-track { margin-bottom: 8px; }
+  body.entry-open .entry-subtitle { margin: 3px 0 8px; }
+  body.entry-open .number-display { height: 48px; }
+  body.entry-open .keypad { grid-template-columns: repeat(6, 1fr); gap: 5px; }
+  body.entry-open .keypad button { height: clamp(38px, 11vh, 48px); }
+  body.entry-open .finish-player { min-height: 40px; margin-top: 6px; }
+}
