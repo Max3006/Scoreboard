@@ -799,3 +799,26 @@ body.game-open .app-shell { background: #151517; }
     inset: calc(env(safe-area-inset-top) + 44px) calc(env(safe-area-inset-right) + 18px) calc(env(safe-area-inset-bottom) + 16px) calc(env(safe-area-inset-left) + 18px);
   }
 }
+
+
+/* Correct the internal canvas size after the portrait fallback rotates it. */
+#game-view .score-name {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow: visible;
+  white-space: normal;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+  line-height: 1.16;
+}
+@media (orientation: portrait) and (max-width: 900px) {
+  body.game-open #game-view.active {
+    width: 100%;
+    height: 100%;
+  }
+  body.game-open #game-view .score-grid {
+    width: auto;
+    height: auto;
+  }
+}
