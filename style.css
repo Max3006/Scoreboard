@@ -942,3 +942,20 @@ body.entry-open .finish-player { margin-top: 8px; min-height: 46px; }
 #game-view .score-grid .board-start .round-start-icon,
 #game-view .score-grid .board-start .round-start-title,
 #game-view .score-grid .board-start .round-start-caption { display: none !important; }
+
+
+/* Keep the round-start control out of every player tile; the board center is handled by the grid tap zone. */
+#game-view .score-grid .board-start {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  width: 1px !important;
+  height: 1px !important;
+  min-width: 1px !important;
+  min-height: 1px !important;
+  padding: 0 !important;
+  transform: translate(-50%, -50%) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+}
