@@ -936,3 +936,9 @@ body.entry-open .finish-player { margin-top: 8px; min-height: 46px; }
   body.entry-open .keypad button { height: clamp(38px, 11vh, 48px); }
   body.entry-open .finish-player { min-height: 40px; margin-top: 6px; }
 }
+
+
+/* Suppress legacy button copy; the center touch zone remains accessible by name. */
+#game-view .score-grid .board-start .round-start-icon,
+#game-view .score-grid .board-start .round-start-title,
+#game-view .score-grid .board-start .round-start-caption { display: none !important; }
