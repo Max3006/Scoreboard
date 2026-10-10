@@ -408,6 +408,15 @@
     renderGame(); showView('game-view');
   });
   $('#begin-round').addEventListener('click', beginRound);
+  $('#score-grid').addEventListener('click', (event) => {
+    if (event.target.closest('#begin-round') || !game || game.finished) return;
+    const bounds = $('#score-grid').getBoundingClientRect();
+    const centerX = bounds.left + bounds.width / 2;
+    const centerY = bounds.top + bounds.height / 2;
+    const tapWidth = Math.min(bounds.width * 0.38, 280);
+    const tapHeight = Math.min(bounds.height * 0.34, 220);
+    if (Math.abs(event.clientX - centerX) <= tapWidth / 2 && Math.abs(event.clientY - centerY) <= tapHeight / 2) beginRound();
+  });
   $('#show-standings-button').addEventListener('click', () => toggleLiveStandings(true));
   $('#close-ranking').addEventListener('click', () => toggleLiveStandings(false));
   $('#end-game-button').addEventListener('click', () => { if (!game || game.finished) return; game.finished = true; game.finishReason = 'manual'; renderGame(); });
