@@ -822,3 +822,14 @@ body.game-open .app-shell { background: #151517; }
     height: auto;
   }
 }
+
+
+/* Bright, friendly tabletop backdrop around the player tiles. */
+body.game-open,
+body.game-open .app-shell,
+#game-view.active {
+  background:
+    radial-gradient(ellipse at 12% 12%, rgba(255, 214, 10, .20), transparent 34%),
+    radial-gradient(ellipse at 88% 84%, rgba(10, 132, 255, .16), transparent 36%),
+    linear-gradient(135deg, #fff9eb 0%, #f2f8ff 100%);
+}
