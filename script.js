@@ -91,8 +91,9 @@
       view.classList.toggle('active', active);
     });
     document.body.classList.toggle('game-open', viewId === 'game-view');
-    $('#new-game-button').hidden = viewId === 'setup-view';
-    $('#edit-game-button').hidden = viewId !== 'game-view' || !game;
+    document.body.classList.toggle('entry-open', viewId === 'round-view');
+    $('#new-game-button').hidden = viewId !== 'round-view';
+    $('#edit-game-button').hidden = viewId !== 'round-view' || !game;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
