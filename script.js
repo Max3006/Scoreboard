@@ -394,7 +394,7 @@
 
   $('#add-player').addEventListener('click', () => {
     if (setupPlayers.length >= MAX_PLAYERS) return;
-    setupPlayers.push({ id: makeId(), name: `Spieler ${setupPlayers.length + 1}`, autoName: true, total: 0 }); renderSetupPlayers();
+    setupPlayers.push({ id: makeId(), name: `Spieler ${setupPlayers.length + 1}`, autoName: true, total: 0, color: PLAYER_COLORS[setupPlayers.length % PLAYER_COLORS.length] }); renderSetupPlayers();
     $('#player-list').lastElementChild?.querySelector('input')?.focus();
   });
   document.querySelectorAll('input[name="end-mode"]').forEach((input) => input.addEventListener('change', () => {
