@@ -194,7 +194,6 @@
     scores.append(startCard);
     const banner = $('#winner-banner');
     banner.hidden = !game.finished;
-    $('#end-game-button').hidden = game.finished;
     if (game.finished) renderStandings();
     renderHistory();
     if (!$('#live-standings').hidden) renderLiveStandings();
@@ -410,7 +409,6 @@
   $('#begin-round').addEventListener('click', beginRound);
   $('#show-standings-button').addEventListener('click', () => toggleLiveStandings(true));
   $('#close-ranking').addEventListener('click', () => toggleLiveStandings(false));
-  $('#end-game-button').addEventListener('click', () => { if (!game || game.finished) return; game.finished = true; game.finishReason = 'manual'; renderGame(); });
   $('#continue-game').addEventListener('click', () => {
     const roundsInput = $('#continue-round-limit');
     const scoreInput = $('#continue-score-limit');
