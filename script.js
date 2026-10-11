@@ -171,6 +171,17 @@
 
   let setupPlayers = defaultPlayers();
 
+  function sizeSideScoreCards() {
+    document.querySelectorAll('#game-view .score-card-side').forEach((card) => {
+      const inner = card.querySelector('.score-card-content-inner');
+      if (!inner || !card.clientWidth || !card.clientHeight) return;
+      // Give the content the card's dimensions swapped before rotating it.
+      // This avoids relying on container query units on mobile browsers.
+      inner.style.width = `${card.clientHeight}px`;
+      inner.style.height = `${card.clientWidth}px`;
+    });
+  }
+
   function renderGame() {
     if (!game) return;
     $('#round-label').textContent = game.endMode === 'rounds' ? `RUNDE ${Math.min(game.roundNumber, game.limit)} VON ${game.limit}` : `RUNDE ${game.roundNumber}`;
@@ -233,6 +244,7 @@
       startCard.style.gridColumn = layout.center;
     }
     scores.append(startCard);
+    requestAnimationFrame(sizeSideScoreCards);
     const banner = $('#winner-banner');
     banner.hidden = !game.finished;
     if (game.finished) renderStandings();
@@ -564,6 +576,8 @@
   $('#edit-form').addEventListener('submit', (event) => { if (event.submitter?.id === 'save-edit') saveEdit(event); });
 
   let installPrompt;
+  window.addEventListener('resize', sizeSideScoreCards);
+  window.addEventListener('orientationchange', () => requestAnimationFrame(sizeSideScoreCards));
   window.addEventListener('beforeinstallprompt', (event) => { event.preventDefault(); installPrompt = event; $('#install-button').hidden = false; });
   $('#install-button').addEventListener('click', async () => {
     if (!installPrompt) return;
