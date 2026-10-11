@@ -48,7 +48,7 @@
         ids.add(id);
         const name = cleanName(player?.name, `Spieler ${index + 1}`);
         const autoName = typeof player?.autoName === 'boolean' ? player.autoName : /^Spieler \d+$/.test(name);
-        return { id, name, autoName, total: safeSignedInteger(player?.total), color: safeColor(player?.color, PLAYER_COLORS[index % PLAYER_COLORS.length]) };
+        return { id, name, autoName, total: safeSignedInteger(player?.total), color: (index === 1 && String(player?.color || '').toLowerCase() === '#398b72') ? PLAYER_COLORS[1] : safeColor(player?.color, PLAYER_COLORS[index % PLAYER_COLORS.length]) };
       });
       const endMode = ['free', 'rounds', 'score'].includes(saved.endMode) ? saved.endMode : 'free';
       const winnerRule = saved.winnerRule === 'low' ? 'low' : 'high';
