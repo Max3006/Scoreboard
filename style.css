@@ -166,6 +166,8 @@ button { cursor: pointer; }
 /* Keep the continue dialog above the fixed, touch-heavy game board on iOS Safari. */
 #continue-dialog[open] {
   position: fixed;
+  inset: 0;
+  margin: auto;
   z-index: 9999;
   pointer-events: auto;
   touch-action: manipulation;
