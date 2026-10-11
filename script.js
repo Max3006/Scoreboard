@@ -4,6 +4,8 @@
   const STORAGE_KEY = 'rundenheld.game.v1';
   const MAX_PLAYERS = 12;
   const MAX_POINTS = 999999999;
+  const PLAYER_COLORS = ['#3b5bdb', '#ed8a49', '#398b72', '#8062b0', '#d15f74', '#368da6', '#ae7d27', '#5c719a', '#aa6544', '#537f4d', '#a14e92', '#617381'];
+  const safeColor = (value, fallback = PLAYER_COLORS[0]) => /^#[0-9a-f]{6}$/i.test(String(value || '')) ? String(value).toLowerCase() : fallback;
   const BOARD_SEATS = {
     four: [[2, 2], [2, 1], [1, 1], [1, 2]],
     eight: [[3, 3], [3, 2], [3, 1], [2, 1], [1, 1], [1, 2], [1, 3], [2, 3]],
@@ -32,7 +34,7 @@
     return Number.isSafeInteger(number) ? Math.min(max, Math.max(min, number)) : fallback;
   };
   const reachedScoreLimit = (total, limit, winnerRule) => winnerRule === 'low' ? total <= limit : total >= limit;
-  const defaultPlayers = () => Array.from({ length: 4 }, (_, index) => ({ id: makeId(), name: `Spieler ${index + 1}`, autoName: true, total: 0 }));
+  const defaultPlayers = () => Array.from({ length: 4 }, (_, index) => ({ id: makeId(), name: `Spieler ${index + 1}`, autoName: true, total: 0, color: PLAYER_COLORS[index % PLAYER_COLORS.length] }));
 
   function loadGame() {
     try {
@@ -46,7 +48,7 @@
         ids.add(id);
         const name = cleanName(player?.name, `Spieler ${index + 1}`);
         const autoName = typeof player?.autoName === 'boolean' ? player.autoName : /^Spieler \d+$/.test(name);
-        return { id, name, autoName, total: safeSignedInteger(player?.total) };
+        return { id, name, autoName, total: safeSignedInteger(player?.total), color: safeColor(player?.color, PLAYER_COLORS[index % PLAYER_COLORS.length]) };
       });
       const endMode = ['free', 'rounds', 'score'].includes(saved.endMode) ? saved.endMode : 'free';
       const winnerRule = saved.winnerRule === 'low' ? 'low' : 'high';
@@ -106,11 +108,23 @@
     number.textContent = String(index + 1).padStart(2, '0');
     const input = document.createElement('input');
     input.type = 'text';
+    input.className = 'player-name-input';
     input.maxLength = 32;
     input.autocomplete = 'off';
     input.value = player.name;
     input.setAttribute('aria-label', `Name für Spieler ${index + 1}`);
     input.addEventListener('input', () => { player.name = input.value.slice(0, 32); player.autoName = input.value.trim() === ''; });
+    const colorLabel = document.createElement('label');
+    colorLabel.className = 'player-color-picker';
+    colorLabel.title = `Farbe für ${player.name || `Spieler ${index + 1}`}`;
+    colorLabel.setAttribute('aria-label', `Farbe für Spieler ${index + 1}`);
+    const colorInput = document.createElement('input');
+    colorInput.type = 'color';
+    colorInput.className = 'player-color-input';
+    colorInput.value = safeColor(player.color, PLAYER_COLORS[index % PLAYER_COLORS.length]);
+    colorInput.setAttribute('aria-label', `Farbe für Spieler ${index + 1}`);
+    colorInput.addEventListener('input', () => { player.color = safeColor(colorInput.value, PLAYER_COLORS[index % PLAYER_COLORS.length]); });
+    colorLabel.append(colorInput);
     const remove = document.createElement('button');
     remove.className = 'remove-player';
     remove.type = 'button';
@@ -118,7 +132,7 @@
     remove.setAttribute('aria-label', `${player.name || `Spieler ${index + 1}`} entfernen`);
     remove.disabled = !canRemove;
     remove.addEventListener('click', () => onRemove(index));
-    row.append(number, input, remove);
+    row.append(number, input, colorLabel, remove);
     return row;
   }
 
@@ -171,6 +185,7 @@
       card.style.gridRow = String(seatPositions[index][0]);
       card.style.gridColumn = String(seatPositions[index][1]);
       card.classList.add(`player-color-${index % 12}`);
+      card.style.setProperty('--player', safeColor(player.color, PLAYER_COLORS[index % PLAYER_COLORS.length]));
       const top = document.createElement('div'); top.className = 'score-card-top';
       const dot = document.createElement('span'); dot.className = 'score-dot'; dot.setAttribute('aria-hidden', 'true');
       const name = document.createElement('span'); name.className = 'score-name'; name.textContent = player.name;
@@ -369,7 +384,7 @@
   }
 
   function startNewGame() {
-    if (game) setupPlayers = game.players.map((player) => ({ id: makeId(), name: player.name, autoName: player.autoName === true, total: 0 }));
+    if (game) setupPlayers = game.players.map((player) => ({ id: makeId(), name: player.name, autoName: player.autoName === true, total: 0, color: safeColor(player.color) }));
     if (game) document.querySelector(`input[name="winner-rule"][value="${game.winnerRule}"]`).checked = true;
     updateScoreTargetBounds();
     toggleLiveStandings(false);
@@ -406,7 +421,7 @@
     const limitInput = mode === 'rounds' ? $('#round-limit') : $('#score-limit');
     if (mode !== 'free' && !limitInput.validity.valid) { limitInput.focus(); return; }
     const winnerRule = $('input[name="winner-rule"]:checked').value;
-    game = { players: setupPlayers.map((player, index) => ({ id: player.id, name: cleanName(player.name, `Spieler ${index + 1}`), autoName: player.autoName === true, total: 0 })), endMode: mode, winnerRule, limit: mode === 'free' ? 0 : (mode === 'score' && winnerRule === 'low' ? safeSignedInteger(limitInput.value, -500, -999999, -1) : safeInteger(limitInput.value, 1, 1, 999999)), roundNumber: 1, history: [], finished: false, finishReason: null };
+    game = { players: setupPlayers.map((player, index) => ({ id: player.id, name: cleanName(player.name, `Spieler ${index + 1}`), autoName: player.autoName === true, total: 0, color: safeColor(player.color, PLAYER_COLORS[index % PLAYER_COLORS.length]) })), endMode: mode, winnerRule, limit: mode === 'free' ? 0 : (mode === 'score' && winnerRule === 'low' ? safeSignedInteger(limitInput.value, -500, -999999, -1) : safeInteger(limitInput.value, 1, 1, 999999)), roundNumber: 1, history: [], finished: false, finishReason: null };
     renderGame(); showView('game-view');
   });
   const rotatedScoreTiles = new Set();
