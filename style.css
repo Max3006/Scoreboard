@@ -964,3 +964,10 @@ body.entry-open .finish-player { margin-top: 8px; min-height: 46px; }
   z-index: 120 !important;
   overflow: hidden !important;
 }
+
+
+/* Remove the empty fixed header overlay from the full-screen player board. */
+body.game-open .topbar,
+body.game-open #game-view .game-heading {
+  display: none !important;
+}
