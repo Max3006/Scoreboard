@@ -43,8 +43,13 @@ button { cursor: pointer; }
 .player-list { display: grid; gap: 8px; margin-top: 17px; }
 .player-row { display: flex; align-items: center; gap: 9px; }
 .player-number { display: grid; flex: 0 0 30px; height: 30px; place-items: center; border-radius: 7px; background: #edf0fc; color: var(--blue); font-size: .72rem; font-weight: 800; }
-.player-row input { width: 0; min-width: 0; height: 43px; flex: 1; padding: 0 12px; border: 1px solid #dfe3eb; border-radius: 7px; background: white; outline: none; }
-.player-row input:focus, .option-detail input:focus, .review-row input:focus { border-color: #7588e4; box-shadow: 0 0 0 3px #3b5bdb18; }
+.player-row .player-name-input { width: 0; min-width: 0; height: 43px; flex: 1; padding: 0 12px; border: 1px solid #dfe3eb; border-radius: 7px; background: white; outline: none; }
+.player-color-picker { width: 39px; height: 39px; flex: 0 0 39px; display: grid; place-items: center; border: 1px solid #dfe3eb; border-radius: 8px; background: white; overflow: hidden; }
+.player-color-input { width: 31px; height: 31px; padding: 0; border: 0; border-radius: 6px; background: transparent; cursor: pointer; }
+.player-color-input::-webkit-color-swatch-wrapper { padding: 0; }
+.player-color-input::-webkit-color-swatch { border: 0; border-radius: 5px; }
+.player-color-input::-moz-color-swatch { border: 0; border-radius: 5px; }
+.player-row .player-name-input:focus, .option-detail input:focus, .review-row input:focus { border-color: #7588e4; box-shadow: 0 0 0 3px #3b5bdb18; }
 .remove-player { width: 34px; height: 34px; border: 0; border-radius: 7px; background: transparent; color: #929aaa; font-size: 1.25rem; }
 .remove-player:hover { background: #fff0ed; color: #c45e49; }
 .remove-player:disabled { visibility: hidden; }
