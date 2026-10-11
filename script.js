@@ -406,6 +406,16 @@
     game = { players: setupPlayers.map((player, index) => ({ id: player.id, name: cleanName(player.name, `Spieler ${index + 1}`), autoName: player.autoName === true, total: 0 })), endMode: mode, winnerRule, limit: mode === 'free' ? 0 : (mode === 'score' && winnerRule === 'low' ? safeSignedInteger(limitInput.value, -500, -999999, -1) : safeInteger(limitInput.value, 1, 1, 999999)), roundNumber: 1, history: [], finished: false, finishReason: null };
     renderGame(); showView('game-view');
   });
+  $('#score-grid').addEventListener('click', (event) => {
+    const card = event.target.closest('.score-card');
+    if (!card) return;
+    card.classList.remove('is-flipping');
+    void card.offsetWidth;
+    card.classList.add('is-flipping');
+  });
+  $('#score-grid').addEventListener('animationend', (event) => {
+    if (event.target.classList.contains('score-card')) event.target.classList.remove('is-flipping');
+  });
   $('#begin-round').addEventListener('click', beginRound);
   $('#show-standings-button').addEventListener('click', () => toggleLiveStandings(true));
   $('#close-ranking').addEventListener('click', () => toggleLiveStandings(false));
