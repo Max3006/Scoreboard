@@ -1032,10 +1032,36 @@ body.game-open #game-view .game-heading {
 .board-layout-choice label { color: var(--muted); font-size: .78rem; font-weight: 650; }
 .board-layout-choice select { width: 100%; min-height: 42px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink); font: inherit; }
 #game-view .score-grid[data-player-count="5"] .score-card-side,
-#game-view .score-grid[data-player-count="6"] .score-card-side { padding: 4px 2px; }
-#game-view .score-card-side .score-name { max-width: 100%; white-space: normal; overflow-wrap: anywhere; font-size: clamp(.62rem, 2.5vmin, 1.5rem); }
-#game-view .score-card-side .score-value { max-width: 100%; overflow-wrap: anywhere; font-size: clamp(1.25rem, min(7vw, 10vh), 4rem); letter-spacing: -.06em; }
+#game-view .score-grid[data-player-count="6"] .score-card-side {
+  position: relative;
+  padding: 4px 2px;
+  container-type: size;
+}
+#game-view .score-card-side .score-card-content {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+#game-view .score-card-side .score-card-content-inner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100cqh;
+  height: 100cqw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  overflow: visible;
+  transform: translate(-50%, -50%) rotate(var(--side-rotation, 90deg));
+  transform-origin: center;
+}
+#game-view .score-card-side .score-card-top { width: 100%; justify-content: center; }
+#game-view .score-card-side .score-name { max-width: 80%; overflow: hidden; font-size: clamp(.7rem, 2.5vmin, 1.35rem); text-overflow: ellipsis; white-space: nowrap; }
+#game-view .score-card-side .score-value { max-width: 100%; margin: 0; overflow: visible; font-size: clamp(1.25rem, min(7vw, 10vh), 4rem); letter-spacing: -.06em; white-space: nowrap; }
 @media (max-width: 600px) {
-  #game-view .score-card-side .score-name { font-size: clamp(.55rem, 2.8vmin, 1rem); }
+  #game-view .score-card-side .score-name { font-size: clamp(.65rem, 2.8vmin, 1rem); }
   #game-view .score-card-side .score-value { font-size: clamp(1rem, min(7vw, 8vh), 2.6rem); }
 }
