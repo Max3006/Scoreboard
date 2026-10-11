@@ -1,4 +1,4 @@
-const CACHE_NAME = 'scoreboard-v23';
+const CACHE_NAME = 'scoreboard-v24';
 const APP_FILES = ['./', './index.html', './style.css?v=21', './script.js?v=16', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', (event) => {
@@ -15,5 +15,17 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
-  event.respondWith(caches.match(event.request).then((cached) => cached || fetch(event.request)));
+  event.respondWith((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    const cached = await cache.match(event.request);
+    try {
+      const response = await fetch(event.request);
+      if (response.ok && response.type !== 'opaque') cache.put(event.request, response.clone()).catch(() => {});
+      return response;
+    } catch {
+      if (cached) return cached;
+      if (event.request.mode === 'navigate') return (await cache.match('./index.html')) || Response.error();
+      return Response.error();
+    }
+  })());
 });
