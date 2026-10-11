@@ -10,8 +10,8 @@
   <meta name="description" content="Ein einfacher Punktzähler für Max und seine Spieleabend-Runde.">
   <title>Scoreboard</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="style.css?v=33">
-  <script src="script.js?v=37" defer></script>
+  <link rel="stylesheet" href="style.css?v=34">
+  <script src="script.js?v=38" defer></script>
 </head>
 <body>
   <main class="app-shell">
@@ -75,6 +75,7 @@
     <footer class="site-footer"><span>Max’ Spieleabend</span><span>Punkte statt Blockpapier.</span></footer>
   </main>
   <dialog id="edit-dialog" class="edit-dialog"><form method="dialog" id="edit-form"><div class="dialog-heading"><div><p class="eyebrow">SPIEL ANPASSEN</p><h2>Spieler verwalten</h2></div><button class="icon-button close-dialog" value="cancel" aria-label="Schließen">×</button></div><div id="edit-player-list" class="player-list"></div>
+    <button class="secondary-button" id="edit-reset-player-appearance" type="button" title="Spielernamen und Farben auf Standard zurücksetzen">Namen &amp; Farben zurücksetzen</button>
     <div class="option-detail board-layout-choice" id="edit-three-layout" hidden><label for="edit-solo-side">Position des einzelnen Spielers (3 Spieler)</label><select id="edit-solo-side"><option value="left">Oben links</option><option value="right">Oben rechts</option></select></div>
     <div class="option-detail board-layout-choice" id="edit-five-layout" hidden><label for="edit-fifth-side">Position von Spieler 5</label><select id="edit-fifth-side"><option value="right">Rechts</option><option value="left">Links</option></select></div>
     <button class="add-player" id="edit-add-player" type="button"><span aria-hidden="true">＋</span> Spieler hinzufügen</button><div class="dialog-actions"><button class="secondary-button" value="cancel">Abbrechen</button><button class="primary-button" id="save-edit" value="save">Änderungen speichern</button></div></form></dialog>
