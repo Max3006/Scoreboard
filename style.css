@@ -996,3 +996,21 @@ body.game-open #game-view .game-heading {
     padding-right: 0;
   }
 }
+
+
+/* A playful half-turn when a player taps their score tile. */
+#game-view .score-card {
+  transform-style: preserve-3d;
+  perspective: 900px;
+}
+#game-view .score-card.is-flipping {
+  animation: score-tile-flip 620ms ease-in-out;
+}
+@keyframes score-tile-flip {
+  0% { transform: rotateY(0deg); }
+  48% { transform: rotateY(180deg); }
+  100% { transform: rotateY(0deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #game-view .score-card.is-flipping { animation-duration: 1ms; }
+}
