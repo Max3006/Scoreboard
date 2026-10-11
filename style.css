@@ -989,9 +989,10 @@ body.game-open #game-view .game-heading {
 }
 
 
-/* Keep the rotated score tiles clear of the iPhone Dynamic Island. */
+/* Keep the rotated score tiles clear of the iPhone Dynamic Island without wasting side space. */
 @media (orientation: portrait) and (max-width: 900px) {
   body.game-open #game-view .score-grid {
-    padding-left: calc(env(safe-area-inset-top, 0px) + 8px);
+    padding-left: env(safe-area-inset-top, 0px);
+    padding-right: 0;
   }
 }
