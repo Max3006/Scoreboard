@@ -1016,7 +1016,8 @@ body.game-open #game-view .game-heading {
 
 
 /* Compact reset control beside player-name setup */
-#reset-player-appearance {
+#reset-player-appearance,
+#edit-reset-player-appearance {
   width: auto;
   min-height: 34px;
   display: inline-flex;
