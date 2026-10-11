@@ -21,7 +21,7 @@
       const rightColumn = fifthSide === 'left' ? 3 : 2;
       return { columns: 3, rows: 2, columnTemplate: fifthSide === 'left' ? 'minmax(0, .62fr) repeat(2, minmax(0, 1fr))' : 'repeat(2, minmax(0, 1fr)) minmax(0, .62fr)', seats: [[2, rightColumn], [2, leftColumn], [1, leftColumn], [1, rightColumn], ['1 / span 2', sideColumn]], center: 'overlay', sideIndexes: [4] };
     }
-    if (count === 6) return { columns: 4, rows: 2, columnTemplate: 'minmax(0, .62fr) repeat(2, minmax(0, 1fr)) minmax(0, .62fr)', seats: [[2, 3], [2, 2], [1, 2], [1, 3], ['1 / span 2', 1], ['1 / span 2', 4]], center: 'overlay', sideIndexes: [4, 5] };
+    if (count === 6) return { columns: 4, rows: 2, columnTemplate: 'minmax(0, .62fr) repeat(2, minmax(0, 1fr)) minmax(0, .62fr)', seats: [[2, 3], [2, 2], ['1 / span 2', 1], [1, 2], [1, 3], ['1 / span 2', 4]], center: 'overlay', sideIndexes: [2, 5] };
     if (count <= 8) return { columns: 3, rows: 3, seats: BOARD_SEATS.eight.slice(0, count), center: '2 / 3' };
     return { columns: 4, rows: 4, seats: BOARD_SEATS.twelve.slice(0, count), center: '2 / 4' };
   };
@@ -215,7 +215,7 @@
       const total = document.createElement('div'); total.className = 'score-value'; total.textContent = player.total.toLocaleString('de-DE');
       const bottom = document.createElement('div'); bottom.className = 'score-card-bottom'; bottom.textContent = game.history.length ? `${game.history.length} ${game.history.length === 1 ? 'Runde' : 'Runden'} gespielt` : 'Noch keine Punkte';
       if (layout.sideIndexes?.includes(index)) {
-        const side = game.players.length === 5 ? game.fifthSide : (index === 4 ? 'left' : 'right');
+        const side = game.players.length === 5 ? game.fifthSide : (index === 2 ? 'left' : 'right');
         card.classList.add(`score-card-side-${side}`);
         card.style.setProperty('--side-rotation', side === 'left' ? '-90deg' : '90deg');
         const content = document.createElement('div'); content.className = 'score-card-content';
