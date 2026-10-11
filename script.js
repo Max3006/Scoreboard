@@ -427,8 +427,9 @@
     $('#continue-rounds-detail').hidden = input.value !== 'rounds' || !input.checked;
     $('#continue-score-detail').hidden = input.value !== 'score' || !input.checked;
   }));
+  $('#continue-close').addEventListener('click', () => $('#continue-dialog').close());
+  $('#continue-cancel').addEventListener('click', () => $('#continue-dialog').close());
   $('#continue-form').addEventListener('submit', (event) => {
-    if (event.submitter?.id !== 'confirm-continue') return;
     event.preventDefault();
     const mode = $('input[name="continue-mode"]:checked').value;
     if (mode === 'rounds' && !$('#continue-round-limit').validity.valid) { $('#continue-round-limit').focus(); return; }
