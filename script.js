@@ -203,7 +203,19 @@
       top.append(dot, name);
       const total = document.createElement('div'); total.className = 'score-value'; total.textContent = player.total.toLocaleString('de-DE');
       const bottom = document.createElement('div'); bottom.className = 'score-card-bottom'; bottom.textContent = game.history.length ? `${game.history.length} ${game.history.length === 1 ? 'Runde' : 'Runden'} gespielt` : 'Noch keine Punkte';
-      card.append(top, total, bottom); scores.append(card);
+      if (layout.sideIndexes?.includes(index)) {
+        const side = game.players.length === 5 ? game.fifthSide : (index === 4 ? 'left' : 'right');
+        card.classList.add(`score-card-side-${side}`);
+        card.style.setProperty('--side-rotation', side === 'left' ? '-90deg' : '90deg');
+        const content = document.createElement('div'); content.className = 'score-card-content';
+        const inner = document.createElement('div'); inner.className = 'score-card-content-inner';
+        inner.append(top, total);
+        content.append(inner);
+        card.append(content);
+      } else {
+        card.append(top, total, bottom);
+      }
+      scores.append(card);
     });
     if (layout.center === 'overlay') {
       startCard.style.gridRow = '';
