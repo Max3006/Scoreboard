@@ -738,7 +738,7 @@ body.game-open { background: #151517; }
 body.game-open .app-shell { background: #151517; }
 #game-view.active { background: #151517; }
 #game-view .score-grid {
-  inset: calc(env(safe-area-inset-top) + 48px) calc(env(safe-area-inset-right) + 14px) calc(env(safe-area-inset-bottom) + 14px) calc(env(safe-area-inset-left) + 14px);
+  inset: calc(env(safe-area-inset-top) + 14px) calc(env(safe-area-inset-right) + 14px) calc(env(safe-area-inset-bottom) + 14px) calc(env(safe-area-inset-left) + 14px);
   width: auto;
   height: auto;
   gap: clamp(10px, 2.2vmin, 24px);
@@ -796,7 +796,7 @@ body.game-open .app-shell { background: #151517; }
 }
 @media (orientation: landscape) and (max-width: 900px) {
   #game-view .score-grid {
-    inset: calc(env(safe-area-inset-top) + 44px) calc(env(safe-area-inset-right) + 18px) calc(env(safe-area-inset-bottom) + 16px) calc(env(safe-area-inset-left) + 18px);
+    inset: calc(env(safe-area-inset-top) + 14px) calc(env(safe-area-inset-right) + 18px) calc(env(safe-area-inset-bottom) + 16px) calc(env(safe-area-inset-left) + 18px);
   }
 }
 
