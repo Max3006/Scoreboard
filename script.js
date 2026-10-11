@@ -12,7 +12,7 @@
     twelve: [[4, 4], [4, 3], [4, 2], [4, 1], [3, 1], [2, 1], [1, 1], [1, 2], [1, 3], [1, 4], [2, 4], [3, 4]],
   };
   const boardLayout = (count, soloSide = 'left', fifthSide = 'right') => {
-    if (count === 2) return { columns: 2, rows: 2, seats: [[1, '1 / 3'], [1, '1 / 3']], center: 'overlay' };
+    if (count === 2) return { columns: 2, rows: 2, seats: [[1, '1 / 3'], [2, '1 / 3']], center: 'overlay' };
     if (count === 3) return { columns: 2, rows: 2, seats: [[2, 2], [2, 1], [1, soloSide === 'right' ? 2 : 1]], center: 'overlay' };
     if (count === 4) return { columns: 2, rows: 2, seats: BOARD_SEATS.four, center: 'overlay' };
     if (count === 5) {
