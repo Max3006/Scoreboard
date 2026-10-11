@@ -497,13 +497,13 @@
   $('#confirm-round').addEventListener('click', confirmRound);
   $('#back-to-entry').addEventListener('click', () => { entryIndex = 0; entryValue = String(pendingScores[0]?.points || ''); renderEntry(); showView('round-view'); });
   $('#reset-player-appearance').addEventListener('click', () => {
-    if (!game || !window.confirm('Alle Spielernamen und Farben auf Standard zurücksetzen? Punktestände und Rundenverlauf bleiben erhalten.')) return;
-    game.players.forEach((player, index) => {
+    if (!window.confirm('Alle Spielernamen und Farben auf Standard zurücksetzen?')) return;
+    setupPlayers.forEach((player, index) => {
       player.name = `Spieler ${index + 1}`;
       player.autoName = true;
       player.color = PLAYER_COLORS[index % PLAYER_COLORS.length];
     });
-    renderGame();
+    renderSetupPlayers();
   });
   $('#new-game-button').addEventListener('click', startNewGame);
   $('#edit-game-button').addEventListener('click', () => {
