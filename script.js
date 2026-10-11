@@ -10,6 +10,7 @@
     twelve: [[1, 4], [1, 1], [4, 1], [4, 4], [1, 2], [4, 3], [1, 3], [4, 2], [2, 4], [2, 1], [3, 4], [3, 1]],
   };
   const boardLayout = (count) => {
+    if (count === 2) return { columns: 2, rows: 2, seats: [[1, '1 / 3'], [2, '1 / 3']], center: 'overlay' };
     if (count <= 4) return { columns: 2, rows: 2, seats: BOARD_SEATS.four.slice(0, count), center: 'overlay' };
     if (count <= 8) return { columns: 3, rows: 3, seats: BOARD_SEATS.eight.slice(0, count), center: '2 / 3' };
     return { columns: 4, rows: 4, seats: BOARD_SEATS.twelve.slice(0, count), center: '2 / 4' };
