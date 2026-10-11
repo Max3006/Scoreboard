@@ -4,7 +4,7 @@
   const STORAGE_KEY = 'rundenheld.game.v1';
   const MAX_PLAYERS = 12;
   const MAX_POINTS = 999999999;
-  const PLAYER_COLORS = ['#e74c3c', '#398b72', '#3b5bdb', '#f1c40f', '#8062b0', '#ed8a49', '#368da6', '#d15f74', '#537f4d', '#ae7d27', '#a14e92', '#617381'];
+  const PLAYER_COLORS = ['#e74c3c', '#2ecc71', '#3b5bdb', '#f1c40f', '#8062b0', '#ed8a49', '#368da6', '#d15f74', '#537f4d', '#ae7d27', '#a14e92', '#617381'];
   const safeColor = (value, fallback = PLAYER_COLORS[0]) => /^#[0-9a-f]{6}$/i.test(String(value || '')) ? String(value).toLowerCase() : fallback;
   const BOARD_SEATS = {
     four: [[2, 2], [2, 1], [1, 1], [1, 2]],
