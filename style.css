@@ -162,6 +162,20 @@ button { cursor: pointer; }
 
 .edit-dialog { width: min(calc(100% - 28px), 490px); max-height: min(85svh, 700px); padding: 20px; border: 1px solid #d9deea; border-radius: 12px; background: #fff; color: var(--ink); }
 .edit-dialog::backdrop { background: #20263488; }
+
+/* Keep the continue dialog above the fixed, touch-heavy game board on iOS Safari. */
+#continue-dialog[open] {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+#continue-dialog[open] form,
+#continue-dialog[open] button,
+#continue-dialog[open] label {
+  pointer-events: auto;
+}
+
 .dialog-heading { display: flex; align-items: center; justify-content: space-between; }
 .dialog-heading h2 { margin: 0 0 14px; font-size: 1.28rem; font-weight: 800; letter-spacing: -.04em; }
 .close-dialog { padding: 5px 10px; font-size: 1.1rem; }
