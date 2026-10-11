@@ -165,6 +165,8 @@
     game.players.forEach((player, index) => {
       const card = document.createElement('article');
       card.className = 'score-card';
+      card.dataset.playerId = player.id;
+      if (rotatedScoreTiles.has(player.id)) card.classList.add('is-rotated');
       card.style.gridRow = String(seatPositions[index][0]);
       card.style.gridColumn = String(seatPositions[index][1]);
       card.classList.add(`player-color-${index % 12}`);
@@ -406,15 +408,19 @@
     game = { players: setupPlayers.map((player, index) => ({ id: player.id, name: cleanName(player.name, `Spieler ${index + 1}`), autoName: player.autoName === true, total: 0 })), endMode: mode, winnerRule, limit: mode === 'free' ? 0 : (mode === 'score' && winnerRule === 'low' ? safeSignedInteger(limitInput.value, -500, -999999, -1) : safeInteger(limitInput.value, 1, 1, 999999)), roundNumber: 1, history: [], finished: false, finishReason: null };
     renderGame(); showView('game-view');
   });
+  const rotatedScoreTiles = new Set();
   $('#score-grid').addEventListener('click', (event) => {
     const card = event.target.closest('.score-card');
     if (!card) return;
-    card.classList.remove('is-flipping');
-    void card.offsetWidth;
-    card.classList.add('is-flipping');
-  });
-  $('#score-grid').addEventListener('animationend', (event) => {
-    if (event.target.classList.contains('score-card')) event.target.classList.remove('is-flipping');
+    const playerId = card.dataset.playerId;
+    if (!playerId) return;
+    if (rotatedScoreTiles.has(playerId)) {
+      rotatedScoreTiles.delete(playerId);
+      card.classList.remove('is-rotated');
+    } else {
+      rotatedScoreTiles.add(playerId);
+      card.classList.add('is-rotated');
+    }
   });
   $('#begin-round').addEventListener('click', beginRound);
   $('#show-standings-button').addEventListener('click', () => toggleLiveStandings(true));
