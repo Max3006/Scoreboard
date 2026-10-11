@@ -11,9 +11,17 @@
     eight: [[3, 3], [3, 2], [3, 1], [2, 1], [1, 1], [1, 2], [1, 3], [2, 3]],
     twelve: [[4, 4], [4, 3], [4, 2], [4, 1], [3, 1], [2, 1], [1, 1], [1, 2], [1, 3], [1, 4], [2, 4], [3, 4]],
   };
-  const boardLayout = (count) => {
-    if (count === 2) return { columns: 2, rows: 2, seats: [[1, '1 / 3'], [2, '1 / 3']], center: 'overlay' };
-    if (count <= 4) return { columns: 2, rows: 2, seats: BOARD_SEATS.four.slice(0, count), center: 'overlay' };
+  const boardLayout = (count, soloSide = 'left', fifthSide = 'right') => {
+    if (count === 2) return { columns: 2, rows: 2, seats: [[1, '1 / 3'], [1, '1 / 3']], center: 'overlay' };
+    if (count === 3) return { columns: 2, rows: 2, seats: [[2, 2], [2, 1], [1, soloSide === 'right' ? 2 : 1]], center: 'overlay' };
+    if (count === 4) return { columns: 2, rows: 2, seats: BOARD_SEATS.four, center: 'overlay' };
+    if (count === 5) {
+      const sideColumn = fifthSide === 'left' ? 1 : 3;
+      const leftColumn = fifthSide === 'left' ? 2 : 1;
+      const rightColumn = fifthSide === 'left' ? 3 : 2;
+      return { columns: 3, rows: 2, columnTemplate: fifthSide === 'left' ? 'minmax(0, .62fr) repeat(2, minmax(0, 1fr))' : 'repeat(2, minmax(0, 1fr)) minmax(0, .62fr)', seats: [[2, rightColumn], [2, leftColumn], [1, leftColumn], [1, rightColumn], ['1 / span 2', sideColumn]], center: 'overlay', sideIndexes: [4] };
+    }
+    if (count === 6) return { columns: 4, rows: 2, columnTemplate: 'minmax(0, .62fr) repeat(2, minmax(0, 1fr)) minmax(0, .62fr)', seats: [[2, 3], [2, 2], [1, 2], [1, 3], ['1 / span 2', 1], ['1 / span 2', 4]], center: 'overlay', sideIndexes: [4, 5] };
     if (count <= 8) return { columns: 3, rows: 3, seats: BOARD_SEATS.eight.slice(0, count), center: '2 / 3' };
     return { columns: 4, rows: 4, seats: BOARD_SEATS.twelve.slice(0, count), center: '2 / 4' };
   };
@@ -61,7 +69,7 @@
       const finished = saved.finished === true;
       const inferredReason = endMode === 'rounds' ? 'rounds' : endMode === 'score' && players.some((player) => reachedScoreLimit(player.total, limit, winnerRule)) ? 'score' : 'manual';
       const finishReason = ['rounds', 'score', 'manual'].includes(saved.finishReason) ? saved.finishReason : (finished ? inferredReason : null);
-      return { players, endMode, winnerRule, limit, roundNumber: safeInteger(saved.roundNumber, history.length + 1, 1, 1000000), history, finished, finishReason };
+      return { players, endMode, winnerRule, limit, roundNumber: safeInteger(saved.roundNumber, history.length + 1, 1, 1000000), history, finished, finishReason, soloSide: saved.soloSide === 'right' ? 'right' : 'left', fifthSide: saved.fifthSide === 'left' ? 'left' : 'right' };
     } catch {
       return null;
     }
@@ -158,6 +166,7 @@
     }, setupPlayers.length > 2)));
     $('#player-count').textContent = `${setupPlayers.length} ${setupPlayers.length === 1 ? 'Spieler' : 'Spieler'}`;
     $('#add-player').disabled = setupPlayers.length >= MAX_PLAYERS;
+    syncSetupLayoutOptions();
   }
 
   let setupPlayers = defaultPlayers();
@@ -172,9 +181,10 @@
     const scores = $('#score-grid');
     const startCard = beginButton;
     scores.replaceChildren();
-    const layout = boardLayout(game.players.length);
+    const layout = boardLayout(game.players.length, game.soloSide, game.fifthSide);
     scores.dataset.playerCount = String(game.players.length);
-    scores.style.gridTemplateColumns = `repeat(${layout.columns}, minmax(0, 1fr))`;
+    scores.dataset.layout = game.players.length === 3 ? `three-${game.soloSide}` : game.players.length === 5 ? `five-${game.fifthSide}` : String(game.players.length);
+    scores.style.gridTemplateColumns = layout.columnTemplate || `repeat(${layout.columns}, minmax(0, 1fr))`;
     scores.style.gridTemplateRows = `repeat(${layout.rows}, minmax(0, 1fr))`;
     const seatPositions = layout.seats;
     game.players.forEach((player, index) => {
@@ -184,6 +194,7 @@
       if (rotatedScoreTiles.has(player.id)) card.classList.add('is-rotated');
       card.style.gridRow = String(seatPositions[index][0]);
       card.style.gridColumn = String(seatPositions[index][1]);
+      if (layout.sideIndexes?.includes(index)) card.classList.add('score-card-side');
       card.classList.add(`player-color-${index % 12}`);
       card.style.setProperty('--player', safeColor(player.color, PLAYER_COLORS[index % PLAYER_COLORS.length]));
       const top = document.createElement('div'); top.className = 'score-card-top';
@@ -366,6 +377,17 @@
       editDraft.splice(removeIndex, 1); renumberDefaultPlayers(editDraft); renderEditList();
     }, editDraft.length > 2)));
     $('#edit-add-player').disabled = editDraft.length >= MAX_PLAYERS;
+    syncEditLayoutOptions();
+  }
+
+  function syncSetupLayoutOptions() {
+    $('#setup-three-layout').hidden = setupPlayers.length !== 3;
+    $('#setup-five-layout').hidden = setupPlayers.length !== 5;
+  }
+
+  function syncEditLayoutOptions() {
+    $('#edit-three-layout').hidden = !editDraft || editDraft.length !== 3;
+    $('#edit-five-layout').hidden = !editDraft || editDraft.length !== 5;
   }
 
   function saveEdit(event) {
@@ -373,6 +395,8 @@
     if (!editDraft || editDraft.length < 2) return;
     const oldIds = new Set(game.players.map((player) => player.id));
     game.players = editDraft.map((player, index) => ({ ...player, name: cleanName(player.name, `Spieler ${index + 1}`), total: safeSignedInteger(player.total) }));
+    game.soloSide = $('#edit-solo-side').value;
+    game.fifthSide = $('#edit-fifth-side').value;
     const newIds = new Set(game.players.map((player) => player.id));
     game.history.forEach((round) => {
       round.scores = round.scores.filter((score) => newIds.has(score.id));
@@ -385,7 +409,11 @@
 
   function startNewGame() {
     if (game) setupPlayers = game.players.map((player) => ({ id: makeId(), name: player.name, autoName: player.autoName === true, total: 0, color: safeColor(player.color) }));
-    if (game) document.querySelector(`input[name="winner-rule"][value="${game.winnerRule}"]`).checked = true;
+    if (game) {
+      document.querySelector(`input[name="winner-rule"][value="${game.winnerRule}"]`).checked = true;
+      $('#setup-solo-side').value = game.soloSide || 'left';
+      $('#setup-fifth-side').value = game.fifthSide || 'right';
+    }
     updateScoreTargetBounds();
     toggleLiveStandings(false);
     renderSetupPlayers();
@@ -421,7 +449,7 @@
     const limitInput = mode === 'rounds' ? $('#round-limit') : $('#score-limit');
     if (mode !== 'free' && !limitInput.validity.valid) { limitInput.focus(); return; }
     const winnerRule = $('input[name="winner-rule"]:checked').value;
-    game = { players: setupPlayers.map((player, index) => ({ id: player.id, name: cleanName(player.name, `Spieler ${index + 1}`), autoName: player.autoName === true, total: 0, color: safeColor(player.color, PLAYER_COLORS[index % PLAYER_COLORS.length]) })), endMode: mode, winnerRule, limit: mode === 'free' ? 0 : (mode === 'score' && winnerRule === 'low' ? safeSignedInteger(limitInput.value, -500, -999999, -1) : safeInteger(limitInput.value, 1, 1, 999999)), roundNumber: 1, history: [], finished: false, finishReason: null };
+    game = { players: setupPlayers.map((player, index) => ({ id: player.id, name: cleanName(player.name, `Spieler ${index + 1}`), autoName: player.autoName === true, total: 0, color: safeColor(player.color, PLAYER_COLORS[index % PLAYER_COLORS.length]) })), endMode: mode, winnerRule, limit: mode === 'free' ? 0 : (mode === 'score' && winnerRule === 'low' ? safeSignedInteger(limitInput.value, -500, -999999, -1) : safeInteger(limitInput.value, 1, 1, 999999)), roundNumber: 1, history: [], finished: false, finishReason: null, soloSide: $('#setup-solo-side').value, fifthSide: $('#setup-fifth-side').value };
     renderGame(); showView('game-view');
   });
   const rotatedScoreTiles = new Set();
@@ -507,8 +535,15 @@
   });
   $('#new-game-button').addEventListener('click', startNewGame);
   $('#edit-game-button').addEventListener('click', () => {
-    editDraft = game.players.map((player) => ({ ...player })); renderEditList(); $('#edit-dialog').showModal();
+    editDraft = game.players.map((player) => ({ ...player }));
+    $('#edit-solo-side').value = game.soloSide || 'left';
+    $('#edit-fifth-side').value = game.fifthSide || 'right';
+    renderEditList(); syncEditLayoutOptions(); $('#edit-dialog').showModal();
   });
+  $('#setup-solo-side').addEventListener('change', () => {});
+  $('#setup-fifth-side').addEventListener('change', () => {});
+  $('#edit-solo-side').addEventListener('change', () => {});
+  $('#edit-fifth-side').addEventListener('change', () => {});
   $('#edit-add-player').addEventListener('click', () => {
     if (editDraft.length >= MAX_PLAYERS) return;
     editDraft.push({ id: makeId(), name: `Spieler ${editDraft.length + 1}`, autoName: true, total: 0 }); renderEditList();
