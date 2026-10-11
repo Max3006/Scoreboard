@@ -557,6 +557,15 @@
     });
     renderSetupPlayers();
   });
+  $('#edit-reset-player-appearance').addEventListener('click', () => {
+    if (!editDraft || !window.confirm('Alle Spielernamen und Farben auf Standard zurücksetzen?')) return;
+    editDraft.forEach((player, index) => {
+      player.name = `Spieler ${index + 1}`;
+      player.autoName = true;
+      player.color = PLAYER_COLORS[index % PLAYER_COLORS.length];
+    });
+    renderEditList();
+  });
   $('#new-game-button').addEventListener('click', startNewGame);
   $('#edit-game-button').addEventListener('click', () => {
     editDraft = game.players.map((player) => ({ ...player }));
