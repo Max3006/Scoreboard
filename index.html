@@ -10,8 +10,8 @@
   <meta name="description" content="Ein einfacher Punktzähler für Max und seine Spieleabend-Runde.">
   <title>Scoreboard</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="style.css?v=22">
-  <script src="script.js?v=17" defer></script>
+  <link rel="stylesheet" href="style.css?v=23">
+  <script src="script.js?v=18" defer></script>
 </head>
 <body>
   <main class="app-shell">
@@ -73,12 +73,12 @@
     <footer class="site-footer"><span>Max’ Spieleabend</span><span>Punkte statt Blockpapier.</span></footer>
   </main>
   <dialog id="edit-dialog" class="edit-dialog"><form method="dialog" id="edit-form"><div class="dialog-heading"><div><p class="eyebrow">SPIEL ANPASSEN</p><h2>Spieler verwalten</h2></div><button class="icon-button close-dialog" value="cancel" aria-label="Schließen">×</button></div><div id="edit-player-list" class="player-list"></div><button class="add-player" id="edit-add-player" type="button"><span aria-hidden="true">＋</span> Spieler hinzufügen</button><div class="dialog-actions"><button class="secondary-button" value="cancel">Abbrechen</button><button class="primary-button" id="save-edit" value="save">Änderungen speichern</button></div></form></dialog>
-  <dialog id="continue-dialog" class="edit-dialog"><form method="dialog" id="continue-form"><div class="dialog-heading"><div><p class="eyebrow">RUNDE GEHT WEITER</p><h2>Was ist das neue Ziel?</h2></div><button class="icon-button close-dialog" value="cancel" aria-label="Schließen">×</button></div><fieldset class="end-options continue-options"><legend>Weiterzählen bis …</legend>
+  <dialog id="continue-dialog" class="edit-dialog"><form id="continue-form"><div class="dialog-heading"><div><p class="eyebrow">RUNDE GEHT WEITER</p><h2>Was ist das neue Ziel?</h2></div><button class="icon-button close-dialog" id="continue-close" type="button" aria-label="Schließen">×</button></div><fieldset class="end-options continue-options"><legend>Weiterzählen bis …</legend>
     <label class="choice"><input type="radio" name="continue-mode" value="free" checked><span class="choice-card"><span class="choice-icon">∞</span><span><strong>ihr aufhören wollt</strong><small>Freies Weiterspielen</small></span><span class="radio-mark"></span></span></label>
     <label class="choice"><input type="radio" name="continue-mode" value="rounds"><span class="choice-card"><span class="choice-icon">↻</span><span><strong>noch Runden gespielt sind</strong><small>Eine Anzahl weiterer Runden</small></span><span class="radio-mark"></span></span></label>
     <div class="option-detail" id="continue-rounds-detail" hidden><label for="continue-round-limit">Weitere Runden</label><input id="continue-round-limit" type="number" inputmode="numeric" min="1" max="999" value="3"></div>
     <label class="choice"><input type="radio" name="continue-mode" value="score"><span class="choice-card"><span class="choice-icon">★</span><span><strong>jemand das Punktziel erreicht</strong><small>Gesamtpunktzahl seit Spielbeginn</small></span><span class="radio-mark"></span></span></label>
     <div class="option-detail" id="continue-score-detail" hidden><label for="continue-score-limit">Punktziel gesamt</label><input id="continue-score-limit" type="number" inputmode="numeric" min="1" max="999999999" value="500"></div>
-    </fieldset><div class="dialog-actions"><button class="secondary-button" value="cancel">Doch nicht</button><button class="primary-button" id="confirm-continue" value="continue">Weiterspielen</button></div></form></dialog>
+    </fieldset><div class="dialog-actions"><button class="secondary-button" id="continue-cancel" type="button">Doch nicht</button><button class="primary-button" id="confirm-continue" type="submit">Weiterspielen</button></div></form></dialog>
 </body>
 </html>
