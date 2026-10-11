@@ -998,19 +998,13 @@ body.game-open #game-view .game-heading {
 }
 
 
-/* A playful half-turn when a player taps their score tile. */
+/* Turn the whole score tile in its own plane, like a place card around a table. */
 #game-view .score-card {
-  transform-style: preserve-3d;
-  perspective: 900px;
+  transition: transform 520ms cubic-bezier(.2, .75, .25, 1);
 }
-#game-view .score-card.is-flipping {
-  animation: score-tile-flip 620ms ease-in-out;
-}
-@keyframes score-tile-flip {
-  0% { transform: rotateY(0deg); }
-  48% { transform: rotateY(180deg); }
-  100% { transform: rotateY(0deg); }
+#game-view .score-card.is-rotated {
+  transform: rotate(180deg);
 }
 @media (prefers-reduced-motion: reduce) {
-  #game-view .score-card.is-flipping { animation-duration: 1ms; }
+  #game-view .score-card { transition-duration: 1ms; }
 }
