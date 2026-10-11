@@ -1025,3 +1025,17 @@ body.game-open #game-view .game-heading {
   font-size: .76rem;
   font-weight: 650;
 }
+
+
+/* Custom table layouts for 3, 5 and 6 players */
+.board-layout-choice { display: grid; gap: 7px; margin: 10px 0 12px; }
+.board-layout-choice label { color: var(--muted); font-size: .78rem; font-weight: 650; }
+.board-layout-choice select { width: 100%; min-height: 42px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink); font: inherit; }
+#game-view .score-grid[data-player-count="5"] .score-card-side,
+#game-view .score-grid[data-player-count="6"] .score-card-side { padding: 4px 2px; }
+#game-view .score-card-side .score-name { max-width: 100%; white-space: normal; overflow-wrap: anywhere; font-size: clamp(.62rem, 2.5vmin, 1.5rem); }
+#game-view .score-card-side .score-value { max-width: 100%; overflow-wrap: anywhere; font-size: clamp(1.25rem, min(7vw, 10vh), 4rem); letter-spacing: -.06em; }
+@media (max-width: 600px) {
+  #game-view .score-card-side .score-name { font-size: clamp(.55rem, 2.8vmin, 1rem); }
+  #game-view .score-card-side .score-value { font-size: clamp(1rem, min(7vw, 8vh), 2.6rem); }
+}
