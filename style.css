@@ -1227,6 +1227,21 @@ body.game-solo-open #game-view .score-grid { left: calc(env(safe-area-inset-left
 .ships-cell.shot-hit { border-color:#bd493c; background:#ef6b5c; color:white; }
 .ships-cell.shot-miss { border-color:#d2e0e8; background:#f7fafc; color:#7d9aaa; }
 .ships-cell:disabled { cursor:default; opacity:1; }
+.ships-tray { grid-column:1 / -1; display:flex; flex-wrap:wrap; align-items:stretch; justify-content:center; gap:9px; margin:0 0 2px; padding:14px; border:1px solid #d7e7ed; border-radius:20px; background:linear-gradient(135deg,#f4fbf8,#f2f8ff); }
+.ships-tray-title { flex:1 0 100%; color:#50727b; font-size:.68rem; font-weight:900; letter-spacing:.14em; text-align:center; }
+.ships-tray-ship { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px; min-width:112px; padding:11px 12px; border:1px solid #cbdfe5; border-radius:14px; background:white; color:#244d5b; cursor:grab; transition:transform .15s,border-color .15s,background .15s; }
+.ships-tray-ship:not(:disabled):hover { transform:translateY(-2px); border-color:#399b91; }
+.ships-tray-ship.is-next { border:2px solid #3a9c8c; background:#effcf7; box-shadow:0 4px 12px rgba(42,139,122,.12); }
+.ships-tray-ship.is-selected { outline:3px solid #8ad8c5; outline-offset:1px; }
+.ships-tray-ship.is-placed { cursor:default; opacity:.55; background:#f1f5f7; }
+.ships-tray-ship.is-waiting { cursor:default; opacity:.65; }
+.ships-tray-ship:disabled { color:#47626c; }
+.ships-tray-blocks { display:flex; gap:3px; min-height:17px; align-items:center; }
+.ships-tray-blocks i { display:block; width:15px; height:15px; border:1px solid #276c7c; border-radius:3px; background:linear-gradient(145deg,#5ca5b2,#347c91); box-shadow:inset 0 1px rgba(255,255,255,.4); }
+.ships-tray-label { font-size:.78rem; font-weight:850; }
+.ships-tray-ship small { color:#66828b; font-size:.68rem; }
+.ships-cell.ship-preview { border-color:#168b76; background:#67d4b2; box-shadow:inset 0 0 0 2px #168b76; }
+.ships-cell.ship-preview-invalid { border-color:#c54b42; background:#ffc1b9; box-shadow:inset 0 0 0 2px #c54b42; }
 .ships-footnote { color:var(--muted); font-size:.78rem; text-align:center; }
 @media(max-width:650px) {
  .ships-game-view { padding-top:18px; }
