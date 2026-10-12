@@ -835,7 +835,23 @@
         selectedShipIndex = nextUnplaced >= 0 ? nextUnplaced : selectedShipIndex;
         saveShipsGame(); renderShipsGame();
       };
-      grid.addEventListener('click', event => { const cell = event.target.closest('[data-cell]'); if (cell) placeAt(Number(cell.dataset.cell)); });
+      grid.addEventListener('click', event => {
+        const cell = event.target.closest('[data-cell]');
+        if (!cell) return;
+        // Ein bereits belegtes Feld antippen: genau dieses Schiff auswählen.
+        // Erst der nächste Tipp auf ein freies Feld verschiebt es dorthin.
+        if (cell.dataset.shipIndex !== undefined) {
+          const ship = player.ships[Number(cell.dataset.shipIndex)];
+          if (ship) {
+            selectedShipIndex = SHIP_TYPES.findIndex(type => type.name === ship.name);
+            shipsOrientation = ship.orientation || 'h';
+            renderShipsGame();
+            status.textContent = `${ship.name} ausgewählt – tippe auf ein freies Startfeld, um das Schiff zu verschieben.`;
+          }
+          return;
+        }
+        placeAt(Number(cell.dataset.cell));
+      });
       grid.addEventListener('dragover', event => {
         const cell = event.target.closest('[data-cell]');
         if (!cell || player.ships.length >= 5) return;
