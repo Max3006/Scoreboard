@@ -11,7 +11,7 @@
   <title>Scoreboard</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="style.css?v=37">
-  <script src="script.js?v=45" defer></script>
+  <script src="script.js?v=46" defer></script>
 </head>
 <body>
   <main class="app-shell">
@@ -83,9 +83,18 @@
     <section class="view collection-view" id="gamebox-view" aria-labelledby="gamebox-title" hidden>
       <div class="hero"><p class="eyebrow">OFFLINE · GEMEINSAM SPIELEN</p><h1 id="gamebox-title">Spielekiste</h1><p class="intro">Kleine Spiele für einen Tisch, ein Handy und mehrere Leute.</p></div>
       <div class="gamebox-grid">
-        <article class="gamebox-card gamebox-ships"><div class="gamebox-art" aria-hidden="true"><span>🚢</span><span>🌊</span><span>🚢</span></div><div class="gamebox-card-copy"><p class="eyebrow">ALS ERSTES GEPLANT</p><h2>Schiffe versenken</h2><p>Ein Klassiker für zwei Spieler – direkt auf einem Handy.</p><span class="gamebox-status">In Vorbereitung</span></div></article>
+        <article class="gamebox-card gamebox-ships"><div class="gamebox-art" aria-hidden="true"><span>🚢</span><span>🌊</span><span>🚢</span></div><div class="gamebox-card-copy"><p class="eyebrow">ALS ERSTES GEPLANT</p><h2>Schiffe versenken</h2><p>Ein Klassiker für zwei Spieler – direkt auf einem Handy.</p><button type="button" class="primary-button ships-start-button">Jetzt spielen <span aria-hidden="true">→</span></button></div></article>
         <article class="gamebox-card gamebox-coming"><div class="gamebox-art" aria-hidden="true"><span>🎲</span><span>✨</span><span>🎲</span></div><div class="gamebox-card-copy"><p class="eyebrow">WEITERE SPIELE</p><h2>Deine nächste Runde</h2><p>Hier kommen weitere Spiele dazu, die sich auf dem Handy wirklich gut spielen lassen.</p><span class="gamebox-status">Weitere Spiele folgen</span></div></article>
       </div>
+    </section>
+
+    <section class="view collection-view ships-game-view" id="ships-game-view" aria-labelledby="ships-game-title" hidden>
+      <div class="ships-game-top"><button type="button" class="back-button" id="ships-back-button">← Spielekiste</button><span class="ships-kicker">2 SPIELER · OFFLINE</span></div>
+      <div class="hero"><p class="eyebrow">TAKTIK &amp; TREFFER</p><h1 id="ships-game-title">Schiffe versenken</h1><p class="intro">Platziert eure Flotten und feuert abwechselnd. Treffer und Wasser werden direkt markiert.</p></div>
+      <div class="ships-status" id="ships-status" aria-live="polite">Spiel wird vorbereitet …</div>
+      <div class="ships-controls" id="ships-controls"></div>
+      <div class="ships-boards" id="ships-boards"></div>
+      <p class="ships-footnote">Der Spielstand wird automatisch auf diesem Gerät gespeichert.</p>
     </section>
     <footer class="site-footer"><span>Max’ Spieleabend</span><span>Punkte statt Blockpapier.</span></footer>
   </main>
