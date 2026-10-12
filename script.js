@@ -762,23 +762,23 @@
       help.textContent = nextType ? 'Ziehe das nächste Schiff von oben auf dein Raster – oder tippe erst ein Schiff und dann auf ein Startfeld.' : 'Deine Flotte ist vollständig.';
       controls.append(help);
       const tray = document.createElement('div'); tray.className = 'ships-tray';
-      const trayTitle = document.createElement('div'); trayTitle.className = 'ships-tray-title'; trayTitle.textContent = 'DEINE SCHIFFE'; tray.append(trayTitle);
+      const trayTitle = document.createElement('div'); trayTitle.className = 'ships-tray-title'; trayTitle.textContent = 'DEINE SCHIFFE · ZIEH EINS AUFS FELD'; tray.append(trayTitle);
+      const shipRow = document.createElement('div'); shipRow.className = 'ships-tray-row';
       SHIP_TYPES.forEach((type, typeIndex) => {
-        const placed = typeIndex < player.ships.length;
+        const placed = player.ships.some(ship => ship.name === type.name);
         const shipCard = document.createElement('button'); shipCard.type = 'button';
-        shipCard.className = 'ships-tray-ship' + (placed ? ' is-placed' : typeIndex === player.ships.length ? ' is-next' : ' is-waiting');
-        shipCard.disabled = placed || typeIndex !== player.ships.length;
-        shipCard.draggable = !shipCard.disabled;
-        shipCard.setAttribute('aria-label', placed ? `${type.name}, platziert` : `${type.name}, ${type.length} Felder, zum Platzieren ziehen oder antippen`);
+        shipCard.className = 'ships-tray-ship' + (placed ? ' is-placed' : selectedShipIndex === typeIndex ? ' is-selected' : '');
+        shipCard.disabled = placed; shipCard.draggable = !placed;
+        shipCard.setAttribute('aria-label', placed ? `${type.name}, platziert` : `${type.name}, ${type.length} Felder, ziehen zum Platzieren`);
         const blocks = document.createElement('span'); blocks.className = 'ships-tray-blocks'; blocks.setAttribute('aria-hidden','true');
         for (let i = 0; i < type.length; i++) { const block = document.createElement('i'); blocks.append(block); }
         const label = document.createElement('span'); label.className = 'ships-tray-label'; label.textContent = type.name;
-        const meta = document.createElement('small'); meta.textContent = placed ? '✓ Platziert' : typeIndex === player.ships.length ? `${type.length} Felder · Ziehen` : `Danach · ${type.length} Felder`;
-        shipCard.append(blocks, label, meta);
-        shipCard.addEventListener('click', () => { if (!shipCard.disabled) { selectedShipIndex = typeIndex; tray.querySelectorAll('.ships-tray-ship').forEach(el => el.classList.remove('is-selected')); shipCard.classList.add('is-selected'); status.textContent = `${type.name} ausgewählt – tippe auf das Startfeld.`; } });
+        shipCard.append(blocks, label);
+        shipCard.addEventListener('click', () => { if (!placed) { selectedShipIndex = typeIndex; renderShipsGame(); status.textContent = `${type.name} ausgewählt – ziehe es aufs Raster oder tippe auf ein Startfeld.`; } });
         shipCard.addEventListener('dragstart', event => { selectedShipIndex = typeIndex; event.dataTransfer?.setData('text/plain', String(typeIndex)); if (event.dataTransfer) event.dataTransfer.effectAllowed = 'copy'; });
-        tray.append(shipCard);
+        shipRow.append(shipCard);
       });
+      tray.append(shipRow);
       boards.append(tray);
       const orientation = document.createElement('button'); orientation.type = 'button'; orientation.className = 'secondary-button'; orientation.textContent = `Ausrichtung: ${shipsOrientation === 'h' ? 'Waagerecht ↔' : 'Senkrecht ↕'}`;
       orientation.addEventListener('click', () => { shipsOrientation = shipsOrientation === 'h' ? 'v' : 'h'; renderShipsGame(); });
@@ -804,15 +804,15 @@
       const grid = document.createElement('div'); grid.className = 'ships-grid';
       renderShipsGrid(grid, player, 'placement', activePlayer);
       const placeAt = index => {
-        const typeIndex = selectedShipIndex < player.ships.length ? player.ships.length : selectedShipIndex;
-        const type = SHIP_TYPES[typeIndex];
-        if (!type || player.ships.length >= 5) return;
+        const type = SHIP_TYPES[selectedShipIndex];
+        if (!type || player.ships.length >= 5 || player.ships.some(ship => ship.name === type.name)) return;
         const row = Math.floor(index / 10), col = index % 10;
         if (!canPlaceShip(player, row, col, type.length, shipsOrientation)) {
           status.textContent = 'Dort passt das Schiff nicht hin. Wähle ein anderes Startfeld.'; return;
         }
         player.ships.push({ ...type, row, col, orientation: shipsOrientation });
-        selectedShipIndex = player.ships.length;
+        selectedShipIndex = SHIP_TYPES.findIndex(type => !player.ships.some(ship => ship.name === type.name));
+        if (selectedShipIndex < 0) selectedShipIndex = 0;
         saveShipsGame(); renderShipsGame();
       };
       grid.addEventListener('click', event => { const cell = event.target.closest('[data-cell]'); if (cell) placeAt(Number(cell.dataset.cell)); });
@@ -835,7 +835,7 @@
         const cell = event.target.closest('[data-cell]'); if (!cell) return;
         event.preventDefault();
         const dataIndex = Number(event.dataTransfer?.getData('text/plain'));
-        if (Number.isInteger(dataIndex) && dataIndex >= player.ships.length && dataIndex < SHIP_TYPES.length) selectedShipIndex = dataIndex;
+        if (Number.isInteger(dataIndex) && dataIndex >= 0 && dataIndex < SHIP_TYPES.length && !player.ships.some(ship => ship.name === SHIP_TYPES[dataIndex].name)) selectedShipIndex = dataIndex;
         placeAt(Number(cell.dataset.cell));
       });
       gridWrap.append(grid); boards.append(gridWrap);
