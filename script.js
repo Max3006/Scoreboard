@@ -446,6 +446,9 @@
     game.roundNumber += 1;
     if (game.endMode === 'rounds' && justFinishedRound >= game.limit) { game.finished = true; game.finishReason = 'rounds'; }
     if (game.endMode === 'score' && game.players.some((player) => reachedScoreLimit(player.total, game.limit, game.winnerRule))) { game.finished = true; game.finishReason = 'score'; }
+    // Persist the completed round immediately, before any view rendering.
+    // On reload, the startup logic restores this game directly to game-view.
+    saveGame();
     pendingScores = [];
     renderGame();
     showView('game-view');
