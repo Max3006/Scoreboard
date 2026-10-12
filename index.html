@@ -10,8 +10,8 @@
   <meta name="description" content="Ein einfacher Punktzähler für Max und seine Spieleabend-Runde.">
   <title>Scoreboard</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="style.css?v=35">
-  <script src="script.js?v=39" defer></script>
+  <link rel="stylesheet" href="style.css?v=37">
+  <script src="script.js?v=40" defer></script>
 </head>
 <body>
   <main class="app-shell">
@@ -19,7 +19,11 @@
       <a class="brand" href="#start" aria-label="Scoreboard Startseite"><span class="brand-mark">S</span><span>Scoreboard</span></a>
       <div class="top-actions"><span class="privacy"><span aria-hidden="true"></span> Max’ Spieleabend</span><button class="icon-button" id="install-button" type="button" hidden aria-label="App installieren">Installieren</button><button class="icon-button home-button" id="new-game-button" type="button" hidden aria-label="Zur Startseite" title="Zur Startseite">⌂</button><button class="icon-button settings-button" id="edit-game-button" type="button" hidden aria-label="Einstellungen" title="Spiel-Einstellungen">⚙</button></div>
     </header>
-
+    <nav class="app-nav" id="app-nav" aria-label="Hauptnavigation">
+      <button type="button" class="app-nav-tab active" data-app-view="setup-view"><span class="app-nav-icon" aria-hidden="true">▦</span><span>Scoreboard</span></button>
+      <button type="button" class="app-nav-tab" data-app-view="continue-games-view"><span class="app-nav-icon" aria-hidden="true">▶</span><span>Fortfahren</span><span class="nav-count" id="saved-game-count" hidden>0</span></button>
+      <button type="button" class="app-nav-tab" data-app-view="gamebox-view"><span class="app-nav-icon" aria-hidden="true">✦</span><span>Spielekiste</span></button>
+    </nav>
     <section class="view active" id="setup-view" aria-labelledby="setup-title">
       <div class="hero"><p class="eyebrow">MAX’ RUNDE · SPIELEABEND</p><h1 id="setup-title">Scoreboard</h1><p class="intro">Namen eintragen, Punkte sammeln und den Überblick behalten. Ganz ohne Blockpapier.</p></div>
       <form id="setup-form" class="panel setup-panel">
@@ -72,6 +76,17 @@
       <button class="secondary-button" id="back-to-entry" type="button">Eingaben fortsetzen</button>
     </section>
 
+    <section class="view collection-view" id="continue-games-view" aria-labelledby="continue-games-title" hidden>
+      <div class="hero"><p class="eyebrow">DEINE SPIELE</p><h1 id="continue-games-title">Fortfahren</h1><p class="intro">Bis zu drei angefangene Spiele aufbewahren und später genau dort weiterspielen.</p></div>
+      <div class="saved-games-list panel" id="saved-games-list" aria-live="polite"></div>
+    </section>
+    <section class="view collection-view" id="gamebox-view" aria-labelledby="gamebox-title" hidden>
+      <div class="hero"><p class="eyebrow">OFFLINE · GEMEINSAM SPIELEN</p><h1 id="gamebox-title">Spielekiste</h1><p class="intro">Kleine Spiele für einen Tisch, ein Handy und mehrere Leute.</p></div>
+      <div class="gamebox-grid">
+        <article class="gamebox-card gamebox-ships"><div class="gamebox-art" aria-hidden="true"><span>🚢</span><span>🌊</span><span>🚢</span></div><div class="gamebox-card-copy"><p class="eyebrow">ALS ERSTES GEPLANT</p><h2>Schiffe versenken</h2><p>Ein Klassiker für zwei Spieler – direkt auf einem Handy.</p><span class="gamebox-status">In Vorbereitung</span></div></article>
+        <article class="gamebox-card gamebox-coming"><div class="gamebox-art" aria-hidden="true"><span>🎲</span><span>✨</span><span>🎲</span></div><div class="gamebox-card-copy"><p class="eyebrow">WEITERE SPIELE</p><h2>Deine nächste Runde</h2><p>Hier kommen weitere Spiele dazu, die sich auf dem Handy wirklich gut spielen lassen.</p><span class="gamebox-status">Weitere Spiele folgen</span></div></article>
+      </div>
+    </section>
     <footer class="site-footer"><span>Max’ Spieleabend</span><span>Punkte statt Blockpapier.</span></footer>
   </main>
   <dialog id="edit-dialog" class="edit-dialog"><form method="dialog" id="edit-form"><div class="dialog-heading"><div><p class="eyebrow">SPIEL ANPASSEN</p><h2>Spieler verwalten</h2></div><button class="icon-button close-dialog" value="cancel" aria-label="Schließen">×</button></div><div id="edit-player-list" class="player-list"></div>
