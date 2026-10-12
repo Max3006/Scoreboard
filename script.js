@@ -733,7 +733,8 @@
       cell.type = 'button'; cell.className = 'ships-cell'; cell.dataset.cell = String(index);
       cell.setAttribute('aria-label', `${SHIP_LETTERS[col]}${row + 1}`);
       const shipIndex = occupied.get(index);
-      if (shipIndex !== undefined) cell.classList.add('has-ship', `ship-kind-${shipIndex}`);
+      // Gegnerische Schiffe bleiben im Zielraster verborgen; Treffer werden trotzdem angezeigt.
+      if (shipIndex !== undefined && mode !== 'target') cell.classList.add('has-ship', `ship-kind-${shipIndex}`);
       if (player.shots[index] === 'hit') { cell.classList.add('shot-hit'); cell.textContent = '✕'; }
       else if (player.shots[index] === 'miss') { cell.classList.add('shot-miss'); cell.textContent = '•'; }
       if (mode === 'placement') cell.title = `${SHIP_LETTERS[col]}${row + 1} platzieren`;
