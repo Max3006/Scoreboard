@@ -1,4 +1,4 @@
-const CACHE_NAME = 'scoreboard-v54';
+const CACHE_NAME = 'scoreboard-v55';
 const APP_FILES = ['./', './index.html', './style.css?v=35', './script.js?v=39', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', (event) => {
