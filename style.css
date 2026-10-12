@@ -1065,3 +1065,94 @@ body.game-open #game-view .game-heading {
   #game-view .score-card-side .score-name { font-size: clamp(.65rem, 2.8vmin, 1rem); }
   #game-view .score-card-side .score-value { font-size: clamp(1rem, min(7vw, 8vh), 2.6rem); }
 }
+
+
+/* Solo view: upright portrait scoreboard for one person managing all scores. */
+body.game-solo-open,
+body.game-solo-open .app-shell,
+body.game-solo-open #game-view.active { background: #f2f5fb; }
+@media (orientation: portrait) and (max-width: 900px) {
+  body.game-solo-open .app-shell {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100dvh;
+    min-height: 0;
+    max-width: none;
+    margin: 0;
+    transform: none;
+    transform-origin: initial;
+  }
+}
+body.game-solo-open #game-view.active {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0;
+}
+body.game-solo-open #game-view .score-grid {
+  position: absolute;
+  inset: calc(env(safe-area-inset-top) + 12px) calc(env(safe-area-inset-right) + 12px) calc(env(safe-area-inset-bottom) + 12px) calc(env(safe-area-inset-left) + 12px);
+  display: grid;
+  width: auto;
+  height: auto;
+  min-height: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: clamp(8px, 1.8vh, 14px);
+  padding: 0;
+  background: transparent;
+}
+body.game-solo-open #game-view .score-card {
+  position: relative;
+  grid-column: auto;
+  min-width: 0;
+  min-height: 0;
+  padding: clamp(6px, 1.4vh, 14px);
+  border-radius: 18px;
+  transform: none !important;
+}
+body.game-solo-open #game-view .score-card-solo-last {
+  grid-column: 1 / -1 !important;
+  width: 50%;
+  justify-self: center;
+}
+body.game-solo-open #game-view .score-name {
+  font-size: clamp(.8rem, 3.2vw, 1.2rem);
+  line-height: 1.15;
+}
+body.game-solo-open #game-view .score-value {
+  font-size: clamp(1.6rem, 8vw, 3rem);
+  letter-spacing: -.04em;
+}
+body.game-solo-open #game-view .score-card-bottom { display: none; }
+body.game-solo-open #game-view .board-start {
+  position: relative !important;
+  inset: auto !important;
+  grid-row: auto !important;
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 46px !important;
+  margin: 0;
+  padding: 10px 16px !important;
+  transform: none !important;
+  opacity: 1 !important;
+  overflow: visible !important;
+  border: 1px solid rgba(60,60,67,.12) !important;
+  border-radius: 14px !important;
+  background: #242428 !important;
+  color: #fff !important;
+  box-shadow: 0 4px 14px rgba(0,0,0,.12) !important;
+}
+body.game-solo-open #game-view .board-start > * { display: block !important; }
+body.game-solo-open #game-view .board-start .round-start-title { display: block !important; color: #fff; font-size: 1rem; }
+body.game-solo-open #game-view .board-start:disabled { opacity: .65 !important; }
+@media (max-width: 380px) {
+  body.game-solo-open #game-view .score-grid { gap: 7px; }
+  body.game-solo-open #game-view .score-card { padding: 5px; border-radius: 13px; }
+  body.game-solo-open #game-view .score-name { font-size: .76rem; }
+  body.game-solo-open #game-view .score-value { font-size: clamp(1.45rem, 7.5vw, 2.2rem); }
+}
