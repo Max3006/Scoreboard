@@ -113,6 +113,45 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+
+  const DIGITAL_GAMES_KEY = 'rundenheld.digitalGames.v1';
+  function loadSavedDigitalGames() {
+    try {
+      const value = JSON.parse(localStorage.getItem(DIGITAL_GAMES_KEY) || '[]');
+      return Array.isArray(value) ? value.filter((item) => item && typeof item.id === 'string' && typeof item.title === 'string').slice(0, 3) : [];
+    } catch { return []; }
+  }
+  function renderSavedDigitalGames() {
+    const list = $('#saved-games-list');
+    if (!list) return;
+    const saved = loadSavedDigitalGames();
+    list.replaceChildren();
+    if (!saved.length) {
+      const empty = document.createElement('div'); empty.className = 'saved-games-empty';
+      const title = document.createElement('h2'); title.textContent = 'Noch keine angefangenen Spiele';
+      const copy = document.createElement('p'); copy.textContent = 'Wenn du ein Spiel aus der Spielekiste startest und unterbrichst, erscheint es hier. Du kannst bis zu drei Spiele behalten.';
+      empty.append(title, copy); list.append(empty); return;
+    }
+    saved.forEach((item) => {
+      const card = document.createElement('article'); card.className = 'saved-game-card';
+      const title = document.createElement('h2'); title.textContent = item.title;
+      const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'secondary-button'; remove.textContent = 'Löschen';
+      remove.addEventListener('click', () => {
+        const next = loadSavedDigitalGames().filter((entry) => entry.id !== item.id);
+        try { localStorage.setItem(DIGITAL_GAMES_KEY, JSON.stringify(next)); } catch {}
+        renderSavedDigitalGames();
+      });
+      card.append(title, remove); list.append(card);
+    });
+  }
+  document.querySelectorAll('[data-app-view]').forEach((tab) => tab.addEventListener('click', () => {
+    const target = tab.dataset.appView;
+    if (target === 'setup-view') {
+      if (game) startNewGame();
+      else { renderSetupPlayers(); showView('setup-view'); }
+    } else showView(target);
+  }));
+
   function makePlayerRow(player, index, onRemove, canRemove = true) {
     const row = document.createElement('div');
     row.className = 'player-row';
