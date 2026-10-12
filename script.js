@@ -106,7 +106,7 @@
     document.body.classList.toggle('entry-open', viewId === 'round-view');
     $('#new-game-button').hidden = viewId !== 'round-view';
     $('#edit-game-button').hidden = viewId !== 'round-view' || !game;
-    const navVisible = ['setup-view', 'continue-games-view', 'gamebox-view'].includes(viewId);
+    const navVisible = ['setup-view', 'game-view', 'continue-games-view', 'gamebox-view'].includes(viewId);
     $('#app-nav').hidden = !navVisible;
     document.querySelectorAll('[data-app-view]').forEach((tab) => tab.classList.toggle('active', tab.dataset.appView === (viewId === 'continue-games-view' || viewId === 'gamebox-view' ? viewId : 'setup-view')));
     if (viewId === 'continue-games-view') renderSavedDigitalGames();
@@ -147,7 +147,7 @@
   document.querySelectorAll('[data-app-view]').forEach((tab) => tab.addEventListener('click', () => {
     const target = tab.dataset.appView;
     if (target === 'setup-view') {
-      if (game) startNewGame();
+      if (game) { renderGame(); showView('game-view'); }
       else { renderSetupPlayers(); showView('setup-view'); }
     } else showView(target);
   }));
