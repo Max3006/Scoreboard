@@ -126,12 +126,25 @@
     if (!list) return;
     const saved = loadSavedDigitalGames();
     list.replaceChildren();
-    if (!saved.length) {
-      const empty = document.createElement('div'); empty.className = 'saved-games-empty';
-      const title = document.createElement('h2'); title.textContent = 'Noch keine angefangenen Spiele';
-      const copy = document.createElement('p'); copy.textContent = 'Wenn du ein Spiel aus der Spielekiste startest und unterbrichst, erscheint es hier. Du kannst bis zu drei Spiele behalten.';
-      empty.append(title, copy); list.append(empty); return;
+
+    // The main Scoreboard game is saved separately; show it here as a real resumable game.
+    const resumableScoreGame = game && !game.finished;
+    if (resumableScoreGame) {
+      const card = document.createElement('article'); card.className = 'saved-game-card';
+      const details = document.createElement('div'); details.className = 'saved-game-details';
+      const title = document.createElement('h2'); title.textContent = 'Punktespiel';
+      const players = document.createElement('p');
+      players.textContent = game.players.map((player) => player.name).join(' · ');
+      const progress = document.createElement('p');
+      progress.textContent = game.endMode === 'rounds'
+        ? `Runde ${Math.min(game.roundNumber, game.limit)} von ${game.limit}`
+        : `Runde ${game.roundNumber}`;
+      details.append(title, players, progress);
+      const resume = document.createElement('button'); resume.type = 'button'; resume.className = 'primary-button'; resume.textContent = 'Fortsetzen';
+      resume.addEventListener('click', () => { renderGame(); showView('game-view'); });
+      card.append(details, resume); list.append(card);
     }
+
     saved.forEach((item) => {
       const card = document.createElement('article'); card.className = 'saved-game-card';
       const title = document.createElement('h2'); title.textContent = item.title;
@@ -143,6 +156,19 @@
       });
       card.append(title, remove); list.append(card);
     });
+
+    const count = (resumableScoreGame ? 1 : 0) + saved.length;
+    const countBadge = $('#saved-game-count');
+    if (countBadge) {
+      countBadge.hidden = count === 0;
+      countBadge.textContent = String(count);
+    }
+    if (count === 0) {
+      const empty = document.createElement('div'); empty.className = 'saved-games-empty';
+      const title = document.createElement('h2'); title.textContent = 'Noch keine angefangenen Spiele';
+      const copy = document.createElement('p'); copy.textContent = 'Dein laufendes Punktespiel erscheint hier automatisch. Weitere Spiele kommen dazu, sobald sie in der Spielekiste spielbar sind.';
+      empty.append(title, copy); list.append(empty);
+    }
   }
   document.querySelectorAll('[data-app-view]').forEach((tab) => tab.addEventListener('click', () => {
     const target = tab.dataset.appView;
