@@ -26,7 +26,7 @@
     return { columns: 4, rows: 4, seats: BOARD_SEATS.twelve.slice(0, count), center: '2 / 4' };
   };
   const $ = (selector, root = document) => root.querySelector(selector);
-  const views = ['setup-view', 'game-view', 'round-view', 'review-view'].map((id) => document.getElementById(id));
+  const views = ['setup-view', 'game-view', 'round-view', 'review-view', 'continue-games-view', 'gamebox-view'].map((id) => document.getElementById(id));
 
   const makeId = () => globalThis.crypto?.randomUUID?.() || `p-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
   const cleanName = (value, fallback) => {
@@ -106,6 +106,10 @@
     document.body.classList.toggle('entry-open', viewId === 'round-view');
     $('#new-game-button').hidden = viewId !== 'round-view';
     $('#edit-game-button').hidden = viewId !== 'round-view' || !game;
+    const navVisible = ['setup-view', 'continue-games-view', 'gamebox-view'].includes(viewId);
+    $('#app-nav').hidden = !navVisible;
+    document.querySelectorAll('[data-app-view]').forEach((tab) => tab.classList.toggle('active', tab.dataset.appView === (viewId === 'continue-games-view' || viewId === 'gamebox-view' ? viewId : 'setup-view')));
+    if (viewId === 'continue-games-view') renderSavedDigitalGames();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -614,5 +618,5 @@
   }
 
   renderSetupPlayers();
-  if (game) { renderGame(); showView('game-view'); }
+  if (game) { renderGame(); showView('game-view'); } else { showView('setup-view'); }
 })();
