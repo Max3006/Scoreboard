@@ -1236,7 +1236,7 @@ body.game-solo-open #game-view .score-grid { left: calc(env(safe-area-inset-left
 .ships-tray-ship.is-placed { cursor:grab; opacity:.48; background:#e9f0f2; }
 .ships-tray-ship.is-placed.is-selected { opacity:1; border-color:#3a9c8c; background:#effcf7; box-shadow:0 3px 10px rgba(42,139,122,.12); }
 .ships-tray-ship:active { cursor:grabbing; }
-.ships-cell.has-ship { cursor:grab; }
+.ships-cell.has-ship { cursor:grab; touch-action:none; user-select:none; -webkit-user-select:none; }
 .ships-cell.ship-preview, .ships-cell.ship-preview-invalid { transition:background .08s,border-color .08s; }
 .ships-tray-ship:disabled { color:#47626c; }
 .ships-tray-blocks { display:flex; flex-direction:row; gap:2px; min-height:18px; align-items:center; }
