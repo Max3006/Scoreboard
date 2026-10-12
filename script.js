@@ -684,6 +684,7 @@
   const SHIP_LETTERS = 'ABCDEFGHIJ';
   let shipsGame = loadShipsGame();
   let shipsOrientation = 'h';
+  let selectedShipIndex = 0;
   function newShipsPlayer(name) { return { name, ships: [], shots: Array(100).fill('') }; }
   function loadShipsGame() {
     try {
@@ -697,7 +698,7 @@
   }
   function makeShipsGame() {
     shipsGame = { phase: 'setup', setupPlayer: 0, turn: 0, winner: null, players: [newShipsPlayer('Spieler 1'), newShipsPlayer('Spieler 2')] };
-    shipsOrientation = 'h'; saveShipsGame(); renderShipsGame();
+    shipsOrientation = 'h'; selectedShipIndex = 0; saveShipsGame(); renderShipsGame();
   }
   function occupiedCells(ship) {
     return Array.from({ length: ship.length }, (_, i) => ship.orientation === 'h' ? ship.row * 10 + ship.col + i : (ship.row + i) * 10 + ship.col);
@@ -756,19 +757,38 @@
     if (shipsGame.phase === 'setup') {
       const player = shipsGame.players[activePlayer];
       status.textContent = `${player.name}: Platziere deine Flotte (${player.ships.length}/5 Schiffe)`;
-      const help = document.createElement('p'); help.className = 'ships-help';
       const nextType = SHIP_TYPES[player.ships.length];
-      help.textContent = nextType ? `Tippe aufs Raster, um den ${nextType.name} (${nextType.length} Felder) zu platzieren. Schiffe dürfen sich nicht überlappen.` : 'Deine Flotte ist vollständig.';
+      const help = document.createElement('p'); help.className = 'ships-help';
+      help.textContent = nextType ? 'Ziehe das nächste Schiff von oben auf dein Raster – oder tippe erst ein Schiff und dann auf ein Startfeld.' : 'Deine Flotte ist vollständig.';
       controls.append(help);
+      const tray = document.createElement('div'); tray.className = 'ships-tray';
+      const trayTitle = document.createElement('div'); trayTitle.className = 'ships-tray-title'; trayTitle.textContent = 'DEINE SCHIFFE'; tray.append(trayTitle);
+      SHIP_TYPES.forEach((type, typeIndex) => {
+        const placed = typeIndex < player.ships.length;
+        const shipCard = document.createElement('button'); shipCard.type = 'button';
+        shipCard.className = 'ships-tray-ship' + (placed ? ' is-placed' : typeIndex === player.ships.length ? ' is-next' : ' is-waiting');
+        shipCard.disabled = placed || typeIndex !== player.ships.length;
+        shipCard.draggable = !shipCard.disabled;
+        shipCard.setAttribute('aria-label', placed ? `${type.name}, platziert` : `${type.name}, ${type.length} Felder, zum Platzieren ziehen oder antippen`);
+        const blocks = document.createElement('span'); blocks.className = 'ships-tray-blocks'; blocks.setAttribute('aria-hidden','true');
+        for (let i = 0; i < type.length; i++) { const block = document.createElement('i'); blocks.append(block); }
+        const label = document.createElement('span'); label.className = 'ships-tray-label'; label.textContent = type.name;
+        const meta = document.createElement('small'); meta.textContent = placed ? '✓ Platziert' : typeIndex === player.ships.length ? `${type.length} Felder · Ziehen` : `Danach · ${type.length} Felder`;
+        shipCard.append(blocks, label, meta);
+        shipCard.addEventListener('click', () => { if (!shipCard.disabled) { selectedShipIndex = typeIndex; tray.querySelectorAll('.ships-tray-ship').forEach(el => el.classList.remove('is-selected')); shipCard.classList.add('is-selected'); status.textContent = `${type.name} ausgewählt – tippe auf das Startfeld.`; } });
+        shipCard.addEventListener('dragstart', event => { selectedShipIndex = typeIndex; event.dataTransfer?.setData('text/plain', String(typeIndex)); if (event.dataTransfer) event.dataTransfer.effectAllowed = 'copy'; });
+        tray.append(shipCard);
+      });
+      boards.append(tray);
       const orientation = document.createElement('button'); orientation.type = 'button'; orientation.className = 'secondary-button'; orientation.textContent = `Ausrichtung: ${shipsOrientation === 'h' ? 'Waagerecht ↔' : 'Senkrecht ↕'}`;
       orientation.addEventListener('click', () => { shipsOrientation = shipsOrientation === 'h' ? 'v' : 'h'; renderShipsGame(); });
       controls.append(orientation);
       const random = document.createElement('button'); random.type = 'button'; random.className = 'secondary-button'; random.textContent = 'Zufällig platzieren';
-      random.addEventListener('click', () => { randomizeFleet(player); saveShipsGame(); renderShipsGame(); });
+      random.addEventListener('click', () => { randomizeFleet(player); selectedShipIndex = player.ships.length; saveShipsGame(); renderShipsGame(); });
       controls.append(random);
       if (player.ships.length) {
         const undo = document.createElement('button'); undo.type = 'button'; undo.className = 'secondary-button'; undo.textContent = 'Letztes Schiff entfernen';
-        undo.addEventListener('click', () => { player.ships.pop(); saveShipsGame(); renderShipsGame(); }); controls.append(undo);
+        undo.addEventListener('click', () => { player.ships.pop(); selectedShipIndex = player.ships.length; saveShipsGame(); renderShipsGame(); }); controls.append(undo);
       }
       const ready = document.createElement('button'); ready.type = 'button'; ready.className = 'primary-button';
       ready.textContent = player.ships.length === 5 ? (activePlayer === 0 ? 'Spieler 1 fertig – weiter zu Spieler 2' : 'Kampf beginnen →') : 'Flotte erst vervollständigen';
@@ -776,23 +796,47 @@
       ready.addEventListener('click', () => {
         if (activePlayer === 0) shipsGame.setupPlayer = 1;
         else { shipsGame.phase = 'playing'; shipsGame.turn = 0; }
-        shipsOrientation = 'h'; saveShipsGame(); renderShipsGame();
+        shipsOrientation = 'h'; selectedShipIndex = 0; saveShipsGame(); renderShipsGame();
       });
       controls.append(ready);
       const gridWrap = document.createElement('section'); gridWrap.className = 'ships-board-wrap';
       const title = document.createElement('h2'); title.textContent = `${player.name}s Flotte`; gridWrap.append(title);
       const grid = document.createElement('div'); grid.className = 'ships-grid';
       renderShipsGrid(grid, player, 'placement', activePlayer);
-      grid.addEventListener('click', event => {
-        const cell = event.target.closest('[data-cell]');
-        if (!cell || player.ships.length >= 5) return;
-        const index = Number(cell.dataset.cell), row = Math.floor(index / 10), col = index % 10;
-        const type = SHIP_TYPES[player.ships.length];
+      const placeAt = index => {
+        const typeIndex = selectedShipIndex < player.ships.length ? player.ships.length : selectedShipIndex;
+        const type = SHIP_TYPES[typeIndex];
+        if (!type || player.ships.length >= 5) return;
+        const row = Math.floor(index / 10), col = index % 10;
         if (!canPlaceShip(player, row, col, type.length, shipsOrientation)) {
-          status.textContent = 'Dort passt das Schiff nicht hin. Wähle ein anderes Feld.'; return;
+          status.textContent = 'Dort passt das Schiff nicht hin. Wähle ein anderes Startfeld.'; return;
         }
         player.ships.push({ ...type, row, col, orientation: shipsOrientation });
+        selectedShipIndex = player.ships.length;
         saveShipsGame(); renderShipsGame();
+      };
+      grid.addEventListener('click', event => { const cell = event.target.closest('[data-cell]'); if (cell) placeAt(Number(cell.dataset.cell)); });
+      grid.addEventListener('dragover', event => {
+        const cell = event.target.closest('[data-cell]');
+        if (!cell || player.ships.length >= 5) return;
+        event.preventDefault();
+        const index = Number(cell.dataset.cell), row = Math.floor(index / 10), col = index % 10;
+        const type = SHIP_TYPES[Math.min(selectedShipIndex, SHIP_TYPES.length - 1)];
+        grid.querySelectorAll('.ships-cell').forEach(el => el.classList.remove('ship-preview','ship-preview-invalid'));
+        const valid = canPlaceShip(player, row, col, type.length, shipsOrientation);
+        for (let i = 0; i < type.length; i++) {
+          const r = shipsOrientation === 'h' ? row : row + i, c = shipsOrientation === 'h' ? col + i : col;
+          if (r < 10 && c < 10) grid.querySelector(`[data-cell="${r * 10 + c}"]`)?.classList.add(valid ? 'ship-preview' : 'ship-preview-invalid');
+        }
+        if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
+      });
+      grid.addEventListener('dragleave', event => { if (!grid.contains(event.relatedTarget)) grid.querySelectorAll('.ships-cell').forEach(el => el.classList.remove('ship-preview','ship-preview-invalid')); });
+      grid.addEventListener('drop', event => {
+        const cell = event.target.closest('[data-cell]'); if (!cell) return;
+        event.preventDefault();
+        const dataIndex = Number(event.dataTransfer?.getData('text/plain'));
+        if (Number.isInteger(dataIndex) && dataIndex >= player.ships.length && dataIndex < SHIP_TYPES.length) selectedShipIndex = dataIndex;
+        placeAt(Number(cell.dataset.cell));
       });
       gridWrap.append(grid); boards.append(gridWrap);
     } else {
