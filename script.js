@@ -757,7 +757,6 @@
     if (shipsGame.phase === 'setup') {
       const player = shipsGame.players[activePlayer];
       status.textContent = `${player.name}: Platziere deine Flotte (${player.ships.length}/5 Schiffe)`;
-      const nextType = SHIP_TYPES[player.ships.length];
       const help = document.createElement('p'); help.className = 'ships-help';
       help.textContent = nextType ? 'Ziehe das nächste Schiff von oben auf dein Raster – oder tippe erst ein Schiff und dann auf ein Startfeld.' : 'Deine Flotte ist vollständig.';
       controls.append(help);
