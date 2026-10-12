@@ -784,11 +784,11 @@
       orientation.addEventListener('click', () => { shipsOrientation = shipsOrientation === 'h' ? 'v' : 'h'; renderShipsGame(); });
       controls.append(orientation);
       const random = document.createElement('button'); random.type = 'button'; random.className = 'secondary-button'; random.textContent = 'Zufällig platzieren';
-      random.addEventListener('click', () => { randomizeFleet(player); selectedShipIndex = player.ships.length; saveShipsGame(); renderShipsGame(); });
+      random.addEventListener('click', () => { randomizeFleet(player); selectedShipIndex = SHIP_TYPES.findIndex(type => !player.ships.some(ship => ship.name === type.name)); if (selectedShipIndex < 0) selectedShipIndex = 0; saveShipsGame(); renderShipsGame(); });
       controls.append(random);
       if (player.ships.length) {
         const undo = document.createElement('button'); undo.type = 'button'; undo.className = 'secondary-button'; undo.textContent = 'Letztes Schiff entfernen';
-        undo.addEventListener('click', () => { player.ships.pop(); selectedShipIndex = player.ships.length; saveShipsGame(); renderShipsGame(); }); controls.append(undo);
+        undo.addEventListener('click', () => { { const removed = player.ships.pop(); selectedShipIndex = Math.max(0, SHIP_TYPES.findIndex(type => type.name === removed?.name)); } saveShipsGame(); renderShipsGame(); }); controls.append(undo);
       }
       const ready = document.createElement('button'); ready.type = 'button'; ready.className = 'primary-button';
       ready.textContent = player.ships.length === 5 ? (activePlayer === 0 ? 'Spieler 1 fertig – weiter zu Spieler 2' : 'Kampf beginnen →') : 'Flotte erst vervollständigen';
