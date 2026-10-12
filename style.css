@@ -1166,3 +1166,17 @@ body.game-solo-open #game-view .board-start:disabled { opacity: .65 !important; 
 /* Align solo view to the left edge instead of centering it in the app shell. */
 body.game-solo-open .app-shell { margin-left: 0 !important; margin-right: auto !important; }
 body.game-solo-open #game-view .score-grid { left: calc(env(safe-area-inset-left) + 6px) !important; right: calc(env(safe-area-inset-right) + 6px) !important; }
+
+
+/* Keep the view selector clearly separated from reset and aligned to the same left edge. */
+#edit-reset-player-appearance { display: flex; margin: 10px 0 0; }
+#edit-dialog .board-view-choice {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+  gap: 7px;
+  width: 100%;
+  margin: 20px 0 16px;
+}
+#edit-dialog .board-view-choice label { margin: 0; text-align: left; }
+#edit-dialog .board-view-choice select { width: 100%; min-width: 0; }
