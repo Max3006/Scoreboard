@@ -660,5 +660,8 @@
   }
 
   renderSetupPlayers();
-  if (game) { renderGame(); showView('game-view'); } else { showView('setup-view'); }
+  // Always open on the landing page with the three main tabs visible.
+  // The saved score game remains intact and is available from the Scoreboard tab.
+  if (game) renderGame();
+  showView('setup-view');
 })();
