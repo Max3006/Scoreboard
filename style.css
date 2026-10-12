@@ -1180,3 +1180,28 @@ body.game-solo-open #game-view .score-grid { left: calc(env(safe-area-inset-left
 }
 #edit-dialog .board-view-choice label { margin: 0; text-align: left; }
 #edit-dialog .board-view-choice select { width: 100%; min-width: 0; }
+
+
+/* Three-section navigation and colorful offline game collection. */
+.app-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 22px;padding:7px;border:1px solid rgba(60,70,90,.08);border-radius:20px;background:rgba(255,255,255,.78);box-shadow:0 5px 18px rgba(35,55,90,.05);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.app-nav[hidden]{display:none!important}
+.app-nav-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:0;min-height:62px;padding:8px 4px;border:0;border-radius:14px;background:transparent;color:var(--muted);font:inherit;font-size:.76rem;font-weight:700;cursor:pointer}
+.app-nav-tab.active{background:linear-gradient(135deg,#e6f8f1,#edf1ff);color:var(--ink);box-shadow:inset 0 0 0 1px rgba(70,105,130,.08)}
+.app-nav-icon{font-size:1.35rem;line-height:1}
+.collection-view .hero{margin-bottom:20px}
+.saved-games-list{padding:0;overflow:hidden}
+.saved-games-empty{padding:30px 20px;text-align:center}
+.saved-games-empty h2{margin:0 0 8px;font-size:1.15rem}
+.saved-games-empty p{max-width:360px;margin:0 auto;color:var(--muted);font-size:.9rem;line-height:1.55}
+.saved-game-card{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px}
+.saved-game-card+.saved-game-card{border-top:1px solid var(--line)}
+.gamebox-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.gamebox-card{min-width:0;overflow:hidden;border:1px solid rgba(60,70,90,.09);border-radius:22px;background:rgba(255,255,255,.88);box-shadow:0 8px 26px rgba(35,55,90,.06)}
+.gamebox-art{display:flex;align-items:center;justify-content:space-around;min-height:110px;padding:15px 8px;background:linear-gradient(135deg,#c8f1e3,#e8f5ff);font-size:clamp(1.8rem,6vw,3rem)}
+.gamebox-coming .gamebox-art{background:linear-gradient(135deg,#ffe8b1,#ffd8d2)}
+.gamebox-card-copy{padding:15px}
+.gamebox-card-copy .eyebrow{margin:0 0 7px;font-size:.62rem}
+.gamebox-card-copy h2{margin:0 0 8px;font-size:1.05rem;line-height:1.2}
+.gamebox-card-copy p:not(.eyebrow){margin:0 0 12px;color:var(--muted);font-size:.84rem;line-height:1.45}
+.gamebox-status{display:inline-flex;padding:6px 9px;border-radius:99px;background:#f0f2f7;color:#555f72;font-size:.7rem;font-weight:700}
+@media(max-width:520px){.app-nav{gap:5px;padding:5px;border-radius:17px;margin-bottom:18px}.app-nav-tab{min-height:58px;font-size:.7rem}.gamebox-grid{grid-template-columns:1fr}.gamebox-art{min-height:92px}.saved-game-card{align-items:flex-start}}
