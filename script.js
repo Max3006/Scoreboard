@@ -725,7 +725,7 @@
       }
     }
   }
-  function renderShipsGrid(container, player, mode, playerIndex) {
+  function renderShipsGrid(container, player, mode, playerIndex, displayedShots = player.shots) {
     container.replaceChildren();
     const occupied = shipCells(player);
     for (let row = 0; row < 10; row++) for (let col = 0; col < 10; col++) {
@@ -735,12 +735,12 @@
       const shipIndex = occupied.get(index);
       // Gegnerische Schiffe bleiben im Zielraster verborgen; Treffer werden trotzdem angezeigt.
       if (shipIndex !== undefined && mode !== 'target') cell.classList.add('has-ship', `ship-kind-${shipIndex}`);
-      if (player.shots[index] === 'hit') { cell.classList.add('shot-hit'); cell.textContent = '✕'; }
-      else if (player.shots[index] === 'miss') { cell.classList.add('shot-miss'); cell.textContent = '•'; }
+      if (displayedShots[index] === 'hit') { cell.classList.add('shot-hit'); cell.textContent = '✕'; }
+      else if (displayedShots[index] === 'miss') { cell.classList.add('shot-miss'); cell.textContent = '•'; }
       if (mode === 'placement') cell.title = `${SHIP_LETTERS[col]}${row + 1} platzieren`;
       else {
-        cell.disabled = mode !== 'target' || player.shots[index] !== '';
-        if (player.shots[index] === '') cell.classList.add('targetable');
+        cell.disabled = mode !== 'target' || displayedShots[index] !== '';
+        if (displayedShots[index] === '') cell.classList.add('targetable');
       }
       container.append(cell);
     }
@@ -803,14 +803,16 @@
         const title = document.createElement('h2'); title.textContent = index === shipsGame.turn ? `${player.name} · Eigene Flotte` : `${player.name} · Zielraster`;
         wrap.append(title);
         const grid = document.createElement('div'); grid.className = 'ships-grid';
-        renderShipsGrid(grid, player, index === shipsGame.turn ? 'own' : 'target', index);
+        const isCurrentPlayer = index === shipsGame.turn;
+        const shotsToDisplay = isCurrentPlayer ? shipsGame.players[1 - index].shots : shipsGame.players[shipsGame.turn].shots;
+        renderShipsGrid(grid, player, isCurrentPlayer ? 'own' : 'target', index, shotsToDisplay);
         if (shipsGame.phase === 'playing' && index !== shipsGame.turn) {
           grid.addEventListener('click', event => {
             const cell = event.target.closest('[data-cell]');
             if (!cell || cell.disabled) return;
             const cellIndex = Number(cell.dataset.cell), actualTarget = shipsGame.players[index], attacker = shipsGame.players[shipsGame.turn];
-            actualTarget.shots[cellIndex] = shipCells(actualTarget).has(cellIndex) ? 'hit' : 'miss';
-            if (actualTarget.shots.filter(value => value === 'hit').length >= 17) { shipsGame.phase = 'finished'; shipsGame.winner = attacker.name; }
+            attacker.shots[cellIndex] = shipCells(actualTarget).has(cellIndex) ? 'hit' : 'miss';
+            if (attacker.shots.filter(value => value === 'hit').length >= 17) { shipsGame.phase = 'finished'; shipsGame.winner = attacker.name; }
             else shipsGame.turn = index;
             saveShipsGame(); renderShipsGame();
           });
