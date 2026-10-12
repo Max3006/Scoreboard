@@ -773,7 +773,8 @@
         const shipCard = document.createElement('button'); shipCard.type = 'button';
         shipCard.className = 'ships-tray-ship' + (placed ? ' is-placed' : '') + (selectedShipIndex === typeIndex ? ' is-selected' : '');
         // Auch platzierte Schiffe bleiben auswählbar, damit man sie neu positionieren kann.
-        shipCard.disabled = false; shipCard.draggable = true;
+        shipCard.disabled = false; shipCard.draggable = false;
+        shipCard.dataset.shipIndex = String(typeIndex);
         shipCard.setAttribute('aria-label', placed ? `${type.name}, platziert – auswählen zum Verschieben` : `${type.name}, ${type.length} Felder, ziehen zum Platzieren`);
         const blocks = document.createElement('span'); blocks.className = 'ships-tray-blocks'; blocks.setAttribute('aria-hidden','true');
         for (let i = 0; i < type.length; i++) { const block = document.createElement('i'); blocks.append(block); }
@@ -785,11 +786,6 @@
           status.textContent = placed
             ? `${type.name} ausgewählt – tippe auf ein neues Startfeld, um es zu verschieben.`
             : `${type.name} ausgewählt – ziehe es aufs Raster oder tippe auf ein Startfeld.`;
-        });
-        shipCard.addEventListener('dragstart', event => {
-          selectedShipIndex = typeIndex;
-          event.dataTransfer?.setData('text/plain', String(typeIndex));
-          if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
         });
         shipRow.append(shipCard);
       });
@@ -827,7 +823,7 @@
         const row = Math.floor(index / 10), col = index % 10;
         if (!canPlaceShip(player, row, col, type.length, shipsOrientation)) {
           if (previousShip) player.ships.splice(existingIndex, 0, previousShip);
-          status.textContent = 'Dort passt das Schiff nicht hin. Wähle ein anderes Startfeld.';
+          status.textContent = 'Dort passt das Schiff nicht hin. Es bleibt an seiner bisherigen Position.';
           return;
         }
         player.ships.push({ ...type, row, col, orientation: shipsOrientation });
@@ -835,6 +831,78 @@
         selectedShipIndex = nextUnplaced >= 0 ? nextUnplaced : selectedShipIndex;
         saveShipsGame(); renderShipsGame();
       };
+      // Echtes Touch-/Maus-Dragging: Das Schiff folgt dem Finger und rastet
+      // beim Loslassen auf dem nächstgelegenen Rasterfeld ein.
+      let pointerDrag = null;
+      const clearPreview = () => grid.querySelectorAll('.ships-cell').forEach(el => el.classList.remove('ship-preview','ship-preview-invalid'));
+      const showPointerPreview = (x, y) => {
+        clearPreview();
+        const rect = grid.getBoundingClientRect();
+        if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) { if (pointerDrag) pointerDrag.targetIndex = null; return; }
+        let index = null, nearest = Infinity;
+        grid.querySelectorAll('[data-cell]').forEach(cell => {
+          const cellRect = cell.getBoundingClientRect();
+          const dx = x - (cellRect.left + cellRect.width / 2), dy = y - (cellRect.top + cellRect.height / 2);
+          const distance = dx * dx + dy * dy;
+          if (distance < nearest) { nearest = distance; index = Number(cell.dataset.cell); }
+        });
+        if (index === null) { if (pointerDrag) pointerDrag.targetIndex = null; return; }
+        const row = Math.floor(index / 10), col = index % 10, type = SHIP_TYPES[selectedShipIndex];
+        const selectedPlaced = player.ships.find(ship => ship.name === type.name);
+        if (selectedPlaced) player.ships.splice(player.ships.indexOf(selectedPlaced), 1);
+        const valid = canPlaceShip(player, row, col, type.length, shipsOrientation);
+        if (selectedPlaced) player.ships.push(selectedPlaced);
+        pointerDrag.targetIndex = index;
+        for (let i = 0; i < type.length; i++) {
+          const r = shipsOrientation === 'h' ? row : row + i, c = shipsOrientation === 'h' ? col + i : col;
+          if (r < 10 && c < 10) grid.querySelector(`[data-cell="${r * 10 + c}"]`)?.classList.add(valid ? 'ship-preview' : 'ship-preview-invalid');
+        }
+      };
+      shipRow.querySelectorAll('.ships-tray-ship').forEach(shipCard => {
+        shipCard.addEventListener('pointerdown', event => {
+          if (event.button !== undefined && event.button !== 0) return;
+          const typeIndex = Number(shipCard.dataset.shipIndex);
+          if (!Number.isInteger(typeIndex)) return;
+          selectedShipIndex = typeIndex;
+          const existing = player.ships.find(ship => ship.name === SHIP_TYPES[typeIndex].name);
+          if (existing) shipsOrientation = existing.orientation || 'h';
+          const ghost = document.createElement('div');
+          ghost.className = 'ships-drag-ghost';
+          const blocks = document.createElement('span'); blocks.className = 'ships-tray-blocks';
+          for (let i = 0; i < SHIP_TYPES[typeIndex].length; i++) { const block = document.createElement('i'); blocks.append(block); }
+          ghost.append(blocks); document.body.append(ghost);
+          pointerDrag = { pointerId: event.pointerId, ghost, targetIndex: null };
+          event.preventDefault();
+          const moveGhost = (x, y) => { ghost.style.left = `${x}px`; ghost.style.top = `${y}px`; };
+          moveGhost(event.clientX, event.clientY);
+          showPointerPreview(event.clientX, event.clientY);
+          const onMove = moveEvent => {
+            if (!pointerDrag || moveEvent.pointerId !== pointerDrag.pointerId) return;
+            moveGhost(moveEvent.clientX, moveEvent.clientY);
+            showPointerPreview(moveEvent.clientX, moveEvent.clientY);
+          };
+          const cancel = cancelEvent => {
+            if (!pointerDrag || cancelEvent.pointerId !== pointerDrag.pointerId) return;
+            document.removeEventListener('pointermove', onMove);
+            document.removeEventListener('pointerup', finish);
+            document.removeEventListener('pointercancel', cancel);
+            pointerDrag.ghost.remove(); pointerDrag = null; clearPreview(); renderShipsGame();
+          };
+          const finish = upEvent => {
+            if (!pointerDrag || upEvent.pointerId !== pointerDrag.pointerId) return;
+            document.removeEventListener('pointermove', onMove);
+            document.removeEventListener('pointerup', finish);
+            document.removeEventListener('pointercancel', cancel);
+            const targetIndex = pointerDrag.targetIndex;
+            pointerDrag.ghost.remove(); pointerDrag = null; clearPreview();
+            if (targetIndex !== null) placeAt(targetIndex);
+            else { renderShipsGame(); status.textContent = 'Ziehe das Schiff auf ein Feld des Rasters.'; }
+          };
+          document.addEventListener('pointermove', onMove);
+          document.addEventListener('pointerup', finish);
+          document.addEventListener('pointercancel', cancel);
+        });
+      });
       grid.addEventListener('click', event => {
         const cell = event.target.closest('[data-cell]');
         if (!cell) return;
