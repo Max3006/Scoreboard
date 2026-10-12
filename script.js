@@ -903,21 +903,55 @@
           document.addEventListener('pointercancel', cancel);
         });
       });
+      // Ein platziertes Schiff direkt auf dem Raster greifen und ziehen.
+      grid.querySelectorAll('.ships-cell[data-ship-index]').forEach(cell => {
+        cell.addEventListener('pointerdown', event => {
+          if (event.button !== undefined && event.button !== 0) return;
+          const ship = player.ships[Number(cell.dataset.shipIndex)];
+          if (!ship) return;
+          selectedShipIndex = SHIP_TYPES.findIndex(type => type.name === ship.name);
+          shipsOrientation = ship.orientation || 'h';
+          const ghost = document.createElement('div');
+          ghost.className = 'ships-drag-ghost';
+          const blocks = document.createElement('span'); blocks.className = 'ships-tray-blocks';
+          for (let i = 0; i < ship.length; i++) { const block = document.createElement('i'); blocks.append(block); }
+          ghost.append(blocks); document.body.append(ghost);
+          pointerDrag = { pointerId: event.pointerId, ghost, targetIndex: null };
+          event.preventDefault();
+          const moveGhost = (x, y) => { ghost.style.left = `${x}px`; ghost.style.top = `${y}px`; };
+          moveGhost(event.clientX, event.clientY);
+          showPointerPreview(event.clientX, event.clientY);
+          const onMove = moveEvent => {
+            if (!pointerDrag || moveEvent.pointerId !== pointerDrag.pointerId) return;
+            moveGhost(moveEvent.clientX, moveEvent.clientY);
+            showPointerPreview(moveEvent.clientX, moveEvent.clientY);
+          };
+          const cancel = cancelEvent => {
+            if (!pointerDrag || cancelEvent.pointerId !== pointerDrag.pointerId) return;
+            document.removeEventListener('pointermove', onMove);
+            document.removeEventListener('pointerup', finish);
+            document.removeEventListener('pointercancel', cancel);
+            pointerDrag.ghost.remove(); pointerDrag = null; clearPreview(); renderShipsGame();
+          };
+          const finish = upEvent => {
+            if (!pointerDrag || upEvent.pointerId !== pointerDrag.pointerId) return;
+            document.removeEventListener('pointermove', onMove);
+            document.removeEventListener('pointerup', finish);
+            document.removeEventListener('pointercancel', cancel);
+            const targetIndex = pointerDrag.targetIndex;
+            pointerDrag.ghost.remove(); pointerDrag = null; clearPreview();
+            if (targetIndex !== null) placeAt(targetIndex);
+            else { renderShipsGame(); status.textContent = 'Ziehe das Schiff auf ein Feld des Rasters.'; }
+          };
+          document.addEventListener('pointermove', onMove);
+          document.addEventListener('pointerup', finish);
+          document.addEventListener('pointercancel', cancel);
+        });
+      });
       grid.addEventListener('click', event => {
         const cell = event.target.closest('[data-cell]');
         if (!cell) return;
-        // Ein bereits belegtes Feld antippen: genau dieses Schiff auswählen.
-        // Erst der nächste Tipp auf ein freies Feld verschiebt es dorthin.
-        if (cell.dataset.shipIndex !== undefined) {
-          const ship = player.ships[Number(cell.dataset.shipIndex)];
-          if (ship) {
-            selectedShipIndex = SHIP_TYPES.findIndex(type => type.name === ship.name);
-            shipsOrientation = ship.orientation || 'h';
-            renderShipsGame();
-            status.textContent = `${ship.name} ausgewählt – tippe auf ein freies Startfeld, um das Schiff zu verschieben.`;
-          }
-          return;
-        }
+        if (cell.dataset.shipIndex !== undefined) return;
         placeAt(Number(cell.dataset.cell));
       });
       grid.addEventListener('dragover', event => {
