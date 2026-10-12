@@ -1233,7 +1233,11 @@ body.game-solo-open #game-view .score-grid { left: calc(env(safe-area-inset-left
 .ships-tray-ship { flex:1 0 auto; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:8px; min-width:0; padding:10px 9px; border:1px solid transparent; border-radius:12px; background:transparent; color:#244d5b; cursor:grab; touch-action:manipulation; transition:transform .15s,border-color .15s,background .15s; }
 .ships-tray-ship:not(:disabled):hover { transform:translateY(-2px); border-color:#b4ddd4; background:#fff; }
 .ships-tray-ship.is-selected:not(:disabled) { border-color:#3a9c8c; background:#effcf7; box-shadow:0 3px 10px rgba(42,139,122,.12); }
-.ships-tray-ship.is-placed { cursor:default; opacity:.38; background:#e9f0f2; }
+.ships-tray-ship.is-placed { cursor:grab; opacity:.48; background:#e9f0f2; }
+.ships-tray-ship.is-placed.is-selected { opacity:1; border-color:#3a9c8c; background:#effcf7; box-shadow:0 3px 10px rgba(42,139,122,.12); }
+.ships-tray-ship:active { cursor:grabbing; }
+.ships-cell.has-ship { cursor:grab; }
+.ships-cell.ship-preview, .ships-cell.ship-preview-invalid { transition:background .08s,border-color .08s; }
 .ships-tray-ship:disabled { color:#47626c; }
 .ships-tray-blocks { display:flex; flex-direction:row; gap:2px; min-height:18px; align-items:center; }
 .ships-tray-blocks i { display:block; flex:0 0 12px; width:12px; height:18px; border:1px solid #276c7c; border-radius:2px; background:linear-gradient(145deg,#5ca5b2,#347c91); box-shadow:inset 0 1px rgba(255,255,255,.4); }
