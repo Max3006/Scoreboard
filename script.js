@@ -173,8 +173,10 @@
   document.querySelectorAll('[data-app-view]').forEach((tab) => tab.addEventListener('click', () => {
     const target = tab.dataset.appView;
     if (target === 'setup-view') {
-      if (game) { renderGame(); showView('game-view'); }
-      else { renderSetupPlayers(); showView('setup-view'); }
+      // The Scoreboard tab always returns to the landing/setup screen.
+      // Resume an existing score game explicitly from the Fortfahren tab.
+      renderSetupPlayers();
+      showView('setup-view');
     } else showView(target);
   }));
 
