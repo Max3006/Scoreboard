@@ -69,7 +69,7 @@
       const finished = saved.finished === true;
       const inferredReason = endMode === 'rounds' ? 'rounds' : endMode === 'score' && players.some((player) => reachedScoreLimit(player.total, limit, winnerRule)) ? 'score' : 'manual';
       const finishReason = ['rounds', 'score', 'manual'].includes(saved.finishReason) ? saved.finishReason : (finished ? inferredReason : null);
-      return { players, endMode, winnerRule, limit, roundNumber: safeInteger(saved.roundNumber, history.length + 1, 1, 1000000), history, finished, finishReason, soloSide: saved.soloSide === 'right' ? 'right' : 'left', fifthSide: saved.fifthSide === 'left' ? 'left' : 'right' };
+      return { players, viewMode: saved.viewMode === 'solo' ? 'solo' : 'table', endMode, winnerRule, limit, roundNumber: safeInteger(saved.roundNumber, history.length + 1, 1, 1000000), history, finished, finishReason, soloSide: saved.soloSide === 'right' ? 'right' : 'left', fifthSide: saved.fifthSide === 'left' ? 'left' : 'right' };
     } catch {
       return null;
     }
@@ -90,7 +90,7 @@
     if (!window.matchMedia('(max-width: 900px)').matches || !navigator.maxTouchPoints) return;
     const orientation = screen.orientation;
     if (!orientation || typeof orientation.lock !== 'function') return;
-    const target = viewId === 'game-view' ? 'landscape' : 'portrait';
+    const target = viewId === 'game-view' && game?.viewMode !== 'solo' ? 'landscape' : 'portrait';
     orientation.lock(target).catch(() => {});
   }
 
@@ -102,6 +102,7 @@
       view.classList.toggle('active', active);
     });
     document.body.classList.toggle('game-open', viewId === 'game-view');
+    document.body.classList.toggle('game-solo-open', viewId === 'game-view' && game?.viewMode === 'solo');
     document.body.classList.toggle('entry-open', viewId === 'round-view');
     $('#new-game-button').hidden = viewId !== 'round-view';
     $('#edit-game-button').hidden = viewId !== 'round-view' || !game;
@@ -192,11 +193,15 @@
     const scores = $('#score-grid');
     const startCard = beginButton;
     scores.replaceChildren();
-    const layout = boardLayout(game.players.length, game.soloSide, game.fifthSide);
+    const soloView = game.viewMode === 'solo';
+    const soloColumns = game.players.length === 2 ? 1 : 2;
+    const soloRows = Math.ceil(game.players.length / soloColumns);
+    const layout = soloView ? { columns: soloColumns, rows: soloRows, seats: game.players.map((_, index) => [Math.floor(index / soloColumns) + 1, index % soloColumns + 1]), center: 'overlay' } : boardLayout(game.players.length, game.soloSide, game.fifthSide);
+    scores.dataset.viewMode = soloView ? 'solo' : 'table';
     scores.dataset.playerCount = String(game.players.length);
     scores.dataset.layout = game.players.length === 3 ? `three-${game.soloSide}` : game.players.length === 5 ? `five-${game.fifthSide}` : String(game.players.length);
     scores.style.gridTemplateColumns = layout.columnTemplate || `repeat(${layout.columns}, minmax(0, 1fr))`;
-    scores.style.gridTemplateRows = `repeat(${layout.rows}, minmax(0, 1fr))`;
+    scores.style.gridTemplateRows = soloView ? `repeat(${layout.rows}, minmax(0, 1fr)) auto` : `repeat(${layout.rows}, minmax(0, 1fr))`;
     const seatPositions = layout.seats;
     game.players.forEach((player, index) => {
       const card = document.createElement('article');
@@ -204,7 +209,9 @@
       card.dataset.playerId = player.id;
       if (rotatedScoreTiles.has(player.id)) card.classList.add('is-rotated');
       card.style.gridRow = String(seatPositions[index][0]);
-      card.style.gridColumn = String(seatPositions[index][1]);
+      card.style.gridColumn = soloView && game.players.length % 2 === 1 && index === game.players.length - 1 && game.players.length > 1 ? '1 / span 2' : String(seatPositions[index][1]);
+      if (soloView && game.players.length === 2) card.style.gridColumn = '1';
+      if (soloView && game.players.length % 2 === 1 && index === game.players.length - 1 && game.players.length > 1) card.classList.add('score-card-solo-last');
       if (layout.sideIndexes?.includes(index)) card.classList.add('score-card-side');
       card.classList.add(`player-color-${index % 12}`);
       card.style.setProperty('--player', safeColor(player.color, PLAYER_COLORS[index % PLAYER_COLORS.length]));
@@ -228,7 +235,14 @@
       }
       scores.append(card);
     });
-    if (layout.center === 'overlay') {
+    if (soloView) {
+      startCard.style.gridRow = String(layout.rows + 1);
+      startCard.style.gridColumn = '1 / -1';
+      startCard.style.position = 'static';
+      startCard.style.left = '';
+      startCard.style.top = '';
+      startCard.style.transform = '';
+    } else if (layout.center === 'overlay') {
       startCard.style.gridRow = '';
       startCard.style.gridColumn = '';
       startCard.style.position = 'absolute';
@@ -421,6 +435,7 @@
     game.players = editDraft.map((player, index) => ({ ...player, name: cleanName(player.name, `Spieler ${index + 1}`), total: safeSignedInteger(player.total) }));
     game.soloSide = $('#edit-solo-side').value;
     game.fifthSide = $('#edit-fifth-side').value;
+    game.viewMode = $('#edit-view-mode').value === 'solo' ? 'solo' : 'table';
     const newIds = new Set(game.players.map((player) => player.id));
     game.history.forEach((round) => {
       round.scores = round.scores.filter((score) => newIds.has(score.id));
@@ -473,7 +488,7 @@
     const limitInput = mode === 'rounds' ? $('#round-limit') : $('#score-limit');
     if (mode !== 'free' && !limitInput.validity.valid) { limitInput.focus(); return; }
     const winnerRule = $('input[name="winner-rule"]:checked').value;
-    game = { players: setupPlayers.map((player, index) => ({ id: player.id, name: cleanName(player.name, `Spieler ${index + 1}`), autoName: player.autoName === true, total: 0, color: safeColor(player.color, PLAYER_COLORS[index % PLAYER_COLORS.length]) })), endMode: mode, winnerRule, limit: mode === 'free' ? 0 : (mode === 'score' && winnerRule === 'low' ? safeSignedInteger(limitInput.value, -500, -999999, -1) : safeInteger(limitInput.value, 1, 1, 999999)), roundNumber: 1, history: [], finished: false, finishReason: null, soloSide: $('#setup-solo-side').value, fifthSide: $('#setup-fifth-side').value };
+    game = { viewMode: game?.viewMode === 'solo' ? 'solo' : 'table', players: setupPlayers.map((player, index) => ({ id: player.id, name: cleanName(player.name, `Spieler ${index + 1}`), autoName: player.autoName === true, total: 0, color: safeColor(player.color, PLAYER_COLORS[index % PLAYER_COLORS.length]) })), endMode: mode, winnerRule, limit: mode === 'free' ? 0 : (mode === 'score' && winnerRule === 'low' ? safeSignedInteger(limitInput.value, -500, -999999, -1) : safeInteger(limitInput.value, 1, 1, 999999)), roundNumber: 1, history: [], finished: false, finishReason: null, soloSide: $('#setup-solo-side').value, fifthSide: $('#setup-fifth-side').value };
     renderGame(); showView('game-view');
   });
   const rotatedScoreTiles = new Set();
@@ -571,6 +586,7 @@
     editDraft = game.players.map((player) => ({ ...player }));
     $('#edit-solo-side').value = game.soloSide || 'left';
     $('#edit-fifth-side').value = game.fifthSide || 'right';
+    $('#edit-view-mode').value = game.viewMode === 'solo' ? 'solo' : 'table';
     renderEditList(); syncEditLayoutOptions(); $('#edit-dialog').showModal();
   });
   $('#setup-solo-side').addEventListener('change', () => {});
