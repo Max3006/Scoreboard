@@ -1263,3 +1263,8 @@ body.game-solo-open #game-view .score-grid { left: calc(env(safe-area-inset-left
 .ships-drag-ghost { position:fixed; z-index:9999; pointer-events:none; transform:translate(-50%,-50%); padding:8px 10px; border:1px solid #168b76; border-radius:10px; background:rgba(239,252,247,.94); box-shadow:0 8px 24px rgba(20,70,65,.24); opacity:.96; }
 .ships-drag-ghost .ships-tray-blocks i { flex-basis:clamp(14px,4vw,22px); width:clamp(14px,4vw,22px); height:clamp(18px,5vw,28px); }
 .ships-tray-ship { touch-action:none; user-select:none; -webkit-user-select:none; }
+
+.ships-fleet-check { flex:1 0 100%; margin:0; padding:10px 12px; border:1px solid #e1d7a9; border-radius:12px; background:#fff9df; color:#765c12; text-align:center; font-size:.88rem; font-weight:750; line-height:1.45; }
+.ships-fleet-check.is-valid { border-color:#a8ddc4; background:#effcf5; color:#176c4b; }
+.ships-cell.has-ship { background:#3f8499; border-color:#2b6479; }
+.ships-cell.has-ship:active { filter:brightness(1.12); }
