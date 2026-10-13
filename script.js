@@ -871,7 +871,6 @@
     else renderShipsGame();
     showView('ships-game-view');
   });
-  $('#ships-back-button')?.addEventListener('click', () => showView('gamebox-view'));
 
   let installPrompt;
   window.addEventListener('resize', sizeSideScoreCards);
