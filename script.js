@@ -801,12 +801,7 @@
       if (!Array.isArray(player.customCells)) player.customCells = [...new Set(player.ships.flatMap(occupiedCells))];
       const groups = rebuildShipsFromCells(player);
       const check = fleetCheck(player);
-      status.textContent = `${player.name}: Baue deine Flotte (${check.count}/17 Felder)`;
-      const help = document.createElement('p'); help.className = 'ships-help';
-      help.textContent = check.correct
-        ? 'Flotte vollständig! Prüfe deine Schiffe und bestätige, wenn alles stimmt.'
-        : 'Tippe Kästchen an, um sie zu setzen. Tippe ein gesetztes Kästchen erneut an, um es zu entfernen. Schiffe müssen zusammenhängende Gruppen mit 5, 4, 3, 3 und 2 Feldern bilden.';
-      controls.append(help);
+      status.textContent = 'Schiffe setzen';
       const validation = document.createElement('p'); validation.className = 'ships-fleet-check';
       const missing = [5,4,3,3,2];
       check.lengths.forEach(length => { const index = missing.indexOf(length); if (index >= 0) missing.splice(index, 1); });
@@ -827,7 +822,6 @@
       });
       controls.append(ready);
       const gridWrap = document.createElement('section'); gridWrap.className = 'ships-board-wrap';
-      const title = document.createElement('h2'); title.textContent = `${player.name}s Flotte`; gridWrap.append(title);
       const grid = document.createElement('div'); grid.className = 'ships-grid';
       renderShipsGrid(grid, player, 'placement', activePlayer);
       grid.addEventListener('click', event => {
