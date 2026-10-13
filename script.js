@@ -102,6 +102,7 @@
       view.classList.toggle('active', active);
     });
     document.body.classList.toggle('game-open', viewId === 'game-view');
+    document.body.classList.toggle('ships-open', viewId === 'ships-game-view');
     document.body.classList.toggle('game-solo-open', viewId === 'game-view' && game?.viewMode === 'solo');
     document.body.classList.toggle('entry-open', viewId === 'round-view');
     $('#new-game-button').hidden = viewId !== 'round-view';
