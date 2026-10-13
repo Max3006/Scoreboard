@@ -1268,3 +1268,28 @@ body.game-solo-open #game-view .score-grid { left: calc(env(safe-area-inset-left
 .ships-fleet-check.is-valid { border-color:#a8ddc4; background:#effcf5; color:#176c4b; }
 .ships-cell.has-ship { background:#3f8499; border-color:#2b6479; }
 .ships-cell.has-ship:active { filter:brightness(1.12); }
+
+
+/* Schiffe versenken läuft als ablenkungsfreie Vollbild-Ansicht. */
+body.ships-open { overflow-x:hidden; }
+body.ships-open .app-shell { width:100%; max-width:none; min-height:100svh; margin:0; padding:0; }
+body.ships-open .topbar,
+body.ships-open #app-nav,
+body.ships-open .site-footer { display:none !important; }
+body.ships-open .ships-game-view { display:block; width:100%; max-width:1100px; min-height:100svh; margin:0 auto; padding: max(10px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); }
+body.ships-open .ships-game-view > .hero { display:none; }
+body.ships-open .ships-game-top { margin:0 0 10px; }
+body.ships-open .ships-kicker { display:none; }
+body.ships-open .ships-status { margin-bottom:10px; padding:10px 12px; border-radius:12px; }
+body.ships-open .ships-controls { margin-bottom:10px; gap:7px; }
+body.ships-open .ships-controls .ships-help { font-size:.8rem; line-height:1.35; }
+body.ships-open .ships-board-wrap { padding:10px; border-radius:14px; }
+body.ships-open .ships-board-wrap h2 { margin-bottom:8px; }
+body.ships-open .ships-boards { gap:10px; }
+body.ships-open .ships-footnote { margin:8px 0 0; font-size:.7rem; }
+@media(max-width:650px) {
+  body.ships-open .ships-game-view { padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)); }
+  body.ships-open .ships-board-wrap { padding:8px; }
+  body.ships-open .ships-boards { gap:9px; }
+  body.ships-open .ships-cell { font-size:clamp(.62rem, 2.4vw, .82rem); }
+}
