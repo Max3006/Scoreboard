@@ -701,7 +701,45 @@
     shipsOrientation = 'h'; selectedShipIndex = 0; saveShipsGame(); renderShipsGame();
   }
   function occupiedCells(ship) {
+    if (Array.isArray(ship.cells)) return ship.cells;
     return Array.from({ length: ship.length }, (_, i) => ship.orientation === 'h' ? ship.row * 10 + ship.col + i : (ship.row + i) * 10 + ship.col);
+  }
+  function connectedShipGroups(cells) {
+    const remaining = new Set(cells), groups = [];
+    while (remaining.size) {
+      const first = remaining.values().next().value, group = [], queue = [first];
+      remaining.delete(first);
+      while (queue.length) {
+        const cell = queue.pop(); group.push(cell);
+        const row = Math.floor(cell / 10), col = cell % 10;
+        const neighbors = [];
+        if (row > 0) neighbors.push(cell - 10);
+        if (row < 9) neighbors.push(cell + 10);
+        if (col > 0) neighbors.push(cell - 1);
+        if (col < 9) neighbors.push(cell + 1);
+        neighbors.forEach(next => { if (remaining.has(next)) { remaining.delete(next); queue.push(next); } });
+      }
+      groups.push(group.sort((a,b) => a-b));
+    }
+    return groups;
+  }
+  function rebuildShipsFromCells(player) {
+    const groups = connectedShipGroups(player.customCells || []);
+    const usedTypes = new Set();
+    player.ships = groups.map((cells, index) => {
+      const type = SHIP_TYPES.find(candidate => candidate.length === cells.length && !usedTypes.has(candidate.name));
+      if (type) usedTypes.add(type.name);
+      const first = cells[0];
+      return { name: type?.name || `Bauteil ${index + 1}`, length: cells.length, cells, row: Math.floor(first / 10), col: first % 10, orientation: 'h' };
+    });
+    return groups;
+  }
+  function fleetCheck(player) {
+    const groups = connectedShipGroups(player.customCells || []);
+    const lengths = groups.map(group => group.length).sort((a,b) => b-a);
+    const expected = [5,4,3,3,2];
+    const correct = lengths.length === expected.length && lengths.every((length,index) => length === expected[index]);
+    return { correct, groups, count: (player.customCells || []).length, lengths };
   }
   function shipCells(player) {
     const cells = new Map();
@@ -759,52 +797,38 @@
     const activePlayer = shipsGame.phase === 'setup' ? shipsGame.setupPlayer : shipsGame.turn;
     if (shipsGame.phase === 'setup') {
       const player = shipsGame.players[activePlayer];
-      status.textContent = `${player.name}: Platziere deine Flotte (${player.ships.length}/5 Schiffe)`;
+      if (!Array.isArray(player.customCells)) player.customCells = [...new Set(player.ships.flatMap(occupiedCells))];
+      const groups = rebuildShipsFromCells(player);
+      const check = fleetCheck(player);
+      status.textContent = `${player.name}: Baue deine Flotte (${check.count}/17 Felder)`;
       const help = document.createElement('p'); help.className = 'ships-help';
-      help.textContent = player.ships.length === 5
-        ? 'Deine Flotte ist vollständig. Du kannst Schiffe oben auswählen und hierher verschieben.'
-        : 'Ziehe ein Schiff von oben aufs Raster. Platziere die Schiffe in beliebiger Reihenfolge; bereits platzierte kannst du erneut verschieben.';
+      help.textContent = check.correct
+        ? 'Flotte vollständig! Prüfe deine Schiffe und bestätige, wenn alles stimmt.'
+        : 'Tippe Kästchen an, um sie zu setzen. Tippe ein gesetztes Kästchen erneut an, um es zu entfernen. Schiffe müssen zusammenhängende Gruppen mit 5, 4, 3, 3 und 2 Feldern bilden.';
       controls.append(help);
-      const tray = document.createElement('div'); tray.className = 'ships-tray';
-      const trayTitle = document.createElement('div'); trayTitle.className = 'ships-tray-title'; trayTitle.textContent = 'DEINE SCHIFFE · ZIEH EINS AUFS FELD'; tray.append(trayTitle);
-      const shipRow = document.createElement('div'); shipRow.className = 'ships-tray-row';
-      SHIP_TYPES.forEach((type, typeIndex) => {
-        const placed = player.ships.some(ship => ship.name === type.name);
-        const shipCard = document.createElement('button'); shipCard.type = 'button';
-        shipCard.className = 'ships-tray-ship' + (placed ? ' is-placed' : '') + (selectedShipIndex === typeIndex ? ' is-selected' : '');
-        // Auch platzierte Schiffe bleiben auswählbar, damit man sie neu positionieren kann.
-        shipCard.disabled = false; shipCard.draggable = false;
-        shipCard.dataset.shipIndex = String(typeIndex);
-        shipCard.setAttribute('aria-label', placed ? `${type.name}, platziert – auswählen zum Verschieben` : `${type.name}, ${type.length} Felder, ziehen zum Platzieren`);
-        const blocks = document.createElement('span'); blocks.className = 'ships-tray-blocks'; blocks.setAttribute('aria-hidden','true');
-        for (let i = 0; i < type.length; i++) { const block = document.createElement('i'); blocks.append(block); }
-        const label = document.createElement('span'); label.className = 'ships-tray-label'; label.textContent = type.name;
-        shipCard.append(blocks, label);
-        shipCard.addEventListener('click', () => {
-          selectedShipIndex = typeIndex;
-          renderShipsGame();
-          status.textContent = placed
-            ? `${type.name} ausgewählt – tippe auf ein neues Startfeld, um es zu verschieben.`
-            : `${type.name} ausgewählt – ziehe es aufs Raster oder tippe auf ein Startfeld.`;
-        });
-        shipRow.append(shipCard);
+      const validation = document.createElement('p'); validation.className = 'ships-fleet-check';
+      validation.textContent = check.correct
+        ? '✓ 5er · 4er · 3er · 3er · 2er – alles vorhanden'
+        : `Bisherige zusammenhängende Gruppen: ${check.lengths.length ? check.lengths.join(' · ') : 'keine'} · Benötigt: 5 · 4 · 3 · 3 · 2`;
+      validation.classList.toggle('is-valid', check.correct);
+      controls.append(validation);
+      const clear = document.createElement('button'); clear.type = 'button'; clear.className = 'secondary-button'; clear.textContent = 'Alle Kästchen entfernen';
+      clear.addEventListener('click', () => { player.customCells = []; player.ships = []; saveShipsGame(); renderShipsGame(); });
+      controls.append(clear);
+      const random = document.createElement('button'); random.type = 'button'; random.className = 'secondary-button'; random.textContent = 'Zufällige Flotte';
+      random.addEventListener('click', () => {
+        const temporary = { ships: [] };
+        randomizeFleet(temporary);
+        player.customCells = [...new Set(temporary.ships.flatMap(occupiedCells))];
+        rebuildShipsFromCells(player); saveShipsGame(); renderShipsGame();
       });
-      tray.append(shipRow);
-      boards.append(tray);
-      const orientation = document.createElement('button'); orientation.type = 'button'; orientation.className = 'secondary-button'; orientation.textContent = `Ausrichtung: ${shipsOrientation === 'h' ? 'Waagerecht ↔' : 'Senkrecht ↕'}`;
-      orientation.addEventListener('click', () => { shipsOrientation = shipsOrientation === 'h' ? 'v' : 'h'; renderShipsGame(); });
-      controls.append(orientation);
-      const random = document.createElement('button'); random.type = 'button'; random.className = 'secondary-button'; random.textContent = 'Zufällig platzieren';
-      random.addEventListener('click', () => { randomizeFleet(player); selectedShipIndex = SHIP_TYPES.findIndex(type => !player.ships.some(ship => ship.name === type.name)); if (selectedShipIndex < 0) selectedShipIndex = 0; saveShipsGame(); renderShipsGame(); });
       controls.append(random);
-      if (player.ships.length) {
-        const undo = document.createElement('button'); undo.type = 'button'; undo.className = 'secondary-button'; undo.textContent = 'Letztes Schiff entfernen';
-        undo.addEventListener('click', () => { { const removed = player.ships.pop(); selectedShipIndex = Math.max(0, SHIP_TYPES.findIndex(type => type.name === removed?.name)); } saveShipsGame(); renderShipsGame(); }); controls.append(undo);
-      }
       const ready = document.createElement('button'); ready.type = 'button'; ready.className = 'primary-button';
-      ready.textContent = player.ships.length === 5 ? (activePlayer === 0 ? 'Spieler 1 fertig – weiter zu Spieler 2' : 'Kampf beginnen →') : 'Flotte erst vervollständigen';
-      ready.disabled = player.ships.length !== 5;
+      ready.textContent = !check.correct ? 'Flotte erst vervollständigen' : (activePlayer === 0 ? 'Spieler 1 fertig – weiter zu Spieler 2' : 'Kampf beginnen →');
+      ready.disabled = !check.correct;
       ready.addEventListener('click', () => {
+        const currentCheck = fleetCheck(player);
+        if (!currentCheck.correct) return;
         if (activePlayer === 0) shipsGame.setupPlayer = 1;
         else { shipsGame.phase = 'playing'; shipsGame.turn = 0; }
         shipsOrientation = 'h'; selectedShipIndex = 0; saveShipsGame(); renderShipsGame();
@@ -814,170 +838,16 @@
       const title = document.createElement('h2'); title.textContent = `${player.name}s Flotte`; gridWrap.append(title);
       const grid = document.createElement('div'); grid.className = 'ships-grid';
       renderShipsGrid(grid, player, 'placement', activePlayer);
-      const placeAt = index => {
-        const type = SHIP_TYPES[selectedShipIndex];
-        if (!type) return;
-        const existingIndex = player.ships.findIndex(ship => ship.name === type.name);
-        if (existingIndex < 0 && player.ships.length >= 5) return;
-        const previousShip = existingIndex >= 0 ? player.ships.splice(existingIndex, 1)[0] : null;
-        const row = Math.floor(index / 10), col = index % 10;
-        if (!canPlaceShip(player, row, col, type.length, shipsOrientation)) {
-          if (previousShip) player.ships.splice(existingIndex, 0, previousShip);
-          status.textContent = 'Dort passt das Schiff nicht hin. Es bleibt an seiner bisherigen Position.';
-          return;
-        }
-        player.ships.push({ ...type, row, col, orientation: shipsOrientation });
-        const nextUnplaced = SHIP_TYPES.findIndex(candidate => !player.ships.some(ship => ship.name === candidate.name));
-        selectedShipIndex = nextUnplaced >= 0 ? nextUnplaced : selectedShipIndex;
-        saveShipsGame(); renderShipsGame();
-      };
-      // Echtes Touch-/Maus-Dragging: Das Schiff folgt dem Finger und rastet
-      // beim Loslassen auf dem nächstgelegenen Rasterfeld ein.
-      let pointerDrag = null;
-      const clearPreview = () => grid.querySelectorAll('.ships-cell').forEach(el => el.classList.remove('ship-preview','ship-preview-invalid'));
-      const showPointerPreview = (x, y) => {
-        clearPreview();
-        const rect = grid.getBoundingClientRect();
-        if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) { if (pointerDrag) pointerDrag.targetIndex = null; return; }
-        let index = null, nearest = Infinity;
-        grid.querySelectorAll('[data-cell]').forEach(cell => {
-          const cellRect = cell.getBoundingClientRect();
-          const dx = x - (cellRect.left + cellRect.width / 2), dy = y - (cellRect.top + cellRect.height / 2);
-          const distance = dx * dx + dy * dy;
-          if (distance < nearest) { nearest = distance; index = Number(cell.dataset.cell); }
-        });
-        if (index === null) { if (pointerDrag) pointerDrag.targetIndex = null; return; }
-        const row = Math.floor(index / 10), col = index % 10, type = SHIP_TYPES[selectedShipIndex];
-        const selectedPlaced = player.ships.find(ship => ship.name === type.name);
-        if (selectedPlaced) player.ships.splice(player.ships.indexOf(selectedPlaced), 1);
-        const valid = canPlaceShip(player, row, col, type.length, shipsOrientation);
-        if (selectedPlaced) player.ships.push(selectedPlaced);
-        pointerDrag.targetIndex = index;
-        for (let i = 0; i < type.length; i++) {
-          const r = shipsOrientation === 'h' ? row : row + i, c = shipsOrientation === 'h' ? col + i : col;
-          if (r < 10 && c < 10) grid.querySelector(`[data-cell="${r * 10 + c}"]`)?.classList.add(valid ? 'ship-preview' : 'ship-preview-invalid');
-        }
-      };
-      shipRow.querySelectorAll('.ships-tray-ship').forEach(shipCard => {
-        shipCard.addEventListener('pointerdown', event => {
-          if (event.button !== undefined && event.button !== 0) return;
-          const typeIndex = Number(shipCard.dataset.shipIndex);
-          if (!Number.isInteger(typeIndex)) return;
-          selectedShipIndex = typeIndex;
-          const existing = player.ships.find(ship => ship.name === SHIP_TYPES[typeIndex].name);
-          if (existing) shipsOrientation = existing.orientation || 'h';
-          const ghost = document.createElement('div');
-          ghost.className = 'ships-drag-ghost';
-          const blocks = document.createElement('span'); blocks.className = 'ships-tray-blocks';
-          for (let i = 0; i < SHIP_TYPES[typeIndex].length; i++) { const block = document.createElement('i'); blocks.append(block); }
-          ghost.append(blocks); document.body.append(ghost);
-          pointerDrag = { pointerId: event.pointerId, ghost, targetIndex: null };
-          event.preventDefault();
-          const moveGhost = (x, y) => { ghost.style.left = `${x}px`; ghost.style.top = `${y}px`; };
-          moveGhost(event.clientX, event.clientY);
-          showPointerPreview(event.clientX, event.clientY);
-          const onMove = moveEvent => {
-            if (!pointerDrag || moveEvent.pointerId !== pointerDrag.pointerId) return;
-            moveGhost(moveEvent.clientX, moveEvent.clientY);
-            showPointerPreview(moveEvent.clientX, moveEvent.clientY);
-          };
-          const cancel = cancelEvent => {
-            if (!pointerDrag || cancelEvent.pointerId !== pointerDrag.pointerId) return;
-            document.removeEventListener('pointermove', onMove);
-            document.removeEventListener('pointerup', finish);
-            document.removeEventListener('pointercancel', cancel);
-            pointerDrag.ghost.remove(); pointerDrag = null; clearPreview(); renderShipsGame();
-          };
-          const finish = upEvent => {
-            if (!pointerDrag || upEvent.pointerId !== pointerDrag.pointerId) return;
-            document.removeEventListener('pointermove', onMove);
-            document.removeEventListener('pointerup', finish);
-            document.removeEventListener('pointercancel', cancel);
-            const targetIndex = pointerDrag.targetIndex;
-            pointerDrag.ghost.remove(); pointerDrag = null; clearPreview();
-            if (targetIndex !== null) placeAt(targetIndex);
-            else { renderShipsGame(); status.textContent = 'Ziehe das Schiff auf ein Feld des Rasters.'; }
-          };
-          document.addEventListener('pointermove', onMove);
-          document.addEventListener('pointerup', finish);
-          document.addEventListener('pointercancel', cancel);
-        });
-      });
-      // Ein platziertes Schiff direkt auf dem Raster greifen und ziehen.
-      grid.querySelectorAll('.ships-cell[data-ship-index]').forEach(cell => {
-        cell.addEventListener('pointerdown', event => {
-          if (event.button !== undefined && event.button !== 0) return;
-          const ship = player.ships[Number(cell.dataset.shipIndex)];
-          if (!ship) return;
-          selectedShipIndex = SHIP_TYPES.findIndex(type => type.name === ship.name);
-          shipsOrientation = ship.orientation || 'h';
-          const ghost = document.createElement('div');
-          ghost.className = 'ships-drag-ghost';
-          const blocks = document.createElement('span'); blocks.className = 'ships-tray-blocks';
-          for (let i = 0; i < ship.length; i++) { const block = document.createElement('i'); blocks.append(block); }
-          ghost.append(blocks); document.body.append(ghost);
-          pointerDrag = { pointerId: event.pointerId, ghost, targetIndex: null };
-          event.preventDefault();
-          const moveGhost = (x, y) => { ghost.style.left = `${x}px`; ghost.style.top = `${y}px`; };
-          moveGhost(event.clientX, event.clientY);
-          showPointerPreview(event.clientX, event.clientY);
-          const onMove = moveEvent => {
-            if (!pointerDrag || moveEvent.pointerId !== pointerDrag.pointerId) return;
-            moveGhost(moveEvent.clientX, moveEvent.clientY);
-            showPointerPreview(moveEvent.clientX, moveEvent.clientY);
-          };
-          const cancel = cancelEvent => {
-            if (!pointerDrag || cancelEvent.pointerId !== pointerDrag.pointerId) return;
-            document.removeEventListener('pointermove', onMove);
-            document.removeEventListener('pointerup', finish);
-            document.removeEventListener('pointercancel', cancel);
-            pointerDrag.ghost.remove(); pointerDrag = null; clearPreview(); renderShipsGame();
-          };
-          const finish = upEvent => {
-            if (!pointerDrag || upEvent.pointerId !== pointerDrag.pointerId) return;
-            document.removeEventListener('pointermove', onMove);
-            document.removeEventListener('pointerup', finish);
-            document.removeEventListener('pointercancel', cancel);
-            const targetIndex = pointerDrag.targetIndex;
-            pointerDrag.ghost.remove(); pointerDrag = null; clearPreview();
-            if (targetIndex !== null) placeAt(targetIndex);
-            else { renderShipsGame(); status.textContent = 'Ziehe das Schiff auf ein Feld des Rasters.'; }
-          };
-          document.addEventListener('pointermove', onMove);
-          document.addEventListener('pointerup', finish);
-          document.addEventListener('pointercancel', cancel);
-        });
-      });
       grid.addEventListener('click', event => {
         const cell = event.target.closest('[data-cell]');
         if (!cell) return;
-        if (cell.dataset.shipIndex !== undefined) return;
-        placeAt(Number(cell.dataset.cell));
-      });
-      grid.addEventListener('dragover', event => {
-        const cell = event.target.closest('[data-cell]');
-        if (!cell || player.ships.length >= 5) return;
-        event.preventDefault();
-        const index = Number(cell.dataset.cell), row = Math.floor(index / 10), col = index % 10;
-        const type = SHIP_TYPES[Math.min(selectedShipIndex, SHIP_TYPES.length - 1)];
-        grid.querySelectorAll('.ships-cell').forEach(el => el.classList.remove('ship-preview','ship-preview-invalid'));
-        const selectedPlaced = player.ships.find(ship => ship.name === type.name);
-        if (selectedPlaced) player.ships.splice(player.ships.indexOf(selectedPlaced), 1);
-        const valid = canPlaceShip(player, row, col, type.length, shipsOrientation);
-        if (selectedPlaced) player.ships.push(selectedPlaced);
-        for (let i = 0; i < type.length; i++) {
-          const r = shipsOrientation === 'h' ? row : row + i, c = shipsOrientation === 'h' ? col + i : col;
-          if (r < 10 && c < 10) grid.querySelector(`[data-cell="${r * 10 + c}"]`)?.classList.add(valid ? 'ship-preview' : 'ship-preview-invalid');
-        }
-        if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
-      });
-      grid.addEventListener('dragleave', event => { if (!grid.contains(event.relatedTarget)) grid.querySelectorAll('.ships-cell').forEach(el => el.classList.remove('ship-preview','ship-preview-invalid')); });
-      grid.addEventListener('drop', event => {
-        const cell = event.target.closest('[data-cell]'); if (!cell) return;
-        event.preventDefault();
-        const dataIndex = Number(event.dataTransfer?.getData('text/plain'));
-        if (Number.isInteger(dataIndex) && dataIndex >= 0 && dataIndex < SHIP_TYPES.length) selectedShipIndex = dataIndex;
-        placeAt(Number(cell.dataset.cell));
+        const index = Number(cell.dataset.cell);
+        const current = new Set(player.customCells || []);
+        if (current.has(index)) current.delete(index);
+        else current.add(index);
+        player.customCells = [...current].sort((a,b) => a-b);
+        rebuildShipsFromCells(player);
+        saveShipsGame(); renderShipsGame();
       });
       gridWrap.append(grid); boards.append(gridWrap);
     } else {
