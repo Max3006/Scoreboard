@@ -11,7 +11,7 @@
   <title>Scoreboard</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="style.css?v=42">
-  <script src="script.js?v=58" defer></script>
+  <script src="script.js?v=59" defer></script>
 </head>
 <body>
   <main class="app-shell">
@@ -89,12 +89,11 @@
     </section>
 
     <section class="view collection-view ships-game-view" id="ships-game-view" aria-labelledby="ships-game-title" hidden>
-      <div class="ships-game-top"><button type="button" class="back-button" id="ships-back-button">← Spielekiste</button><span class="ships-kicker">2 SPIELER · OFFLINE</span></div>
+      <div class="ships-game-top"><span class="ships-kicker">2 SPIELER · OFFLINE</span></div>
       <div class="hero"><p class="eyebrow">TAKTIK &amp; TREFFER</p><h1 id="ships-game-title">Schiffe versenken</h1><p class="intro">Platziert eure Flotten und feuert abwechselnd. Treffer und Wasser werden direkt markiert.</p></div>
       <div class="ships-status" id="ships-status" aria-live="polite">Spiel wird vorbereitet …</div>
       <div class="ships-controls" id="ships-controls"></div>
       <div class="ships-boards" id="ships-boards"></div>
-      <p class="ships-footnote">Der Spielstand wird automatisch auf diesem Gerät gespeichert.</p>
     </section>
     <footer class="site-footer"><span>Max’ Spieleabend</span><span>Punkte statt Blockpapier.</span></footer>
   </main>
