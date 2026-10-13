@@ -1,5 +1,5 @@
-const CACHE_NAME = 'scoreboard-v75';
-const APP_FILES = ['./', './index.html', './style.css?v=42', './script.js?v=58', './manifest.webmanifest', './icon.svg'];
+const CACHE_NAME = 'scoreboard-v76';
+const APP_FILES = ['./', './index.html', './style.css?v=42', './script.js?v=59', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_FILES)));
