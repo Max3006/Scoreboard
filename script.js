@@ -807,24 +807,15 @@
         : 'Tippe Kästchen an, um sie zu setzen. Tippe ein gesetztes Kästchen erneut an, um es zu entfernen. Schiffe müssen zusammenhängende Gruppen mit 5, 4, 3, 3 und 2 Feldern bilden.';
       controls.append(help);
       const validation = document.createElement('p'); validation.className = 'ships-fleet-check';
+      const missing = [5,4,3,3,2];
+      check.lengths.forEach(length => { const index = missing.indexOf(length); if (index >= 0) missing.splice(index, 1); });
       validation.textContent = check.correct
-        ? '✓ 5er · 4er · 3er · 3er · 2er – alles vorhanden'
-        : `Bisherige zusammenhängende Gruppen: ${check.lengths.length ? check.lengths.join(' · ') : 'keine'} · Benötigt: 5 · 4 · 3 · 3 · 2`;
+        ? '✓ Flotte vollständig – alle Schiffe vorhanden'
+        : `Noch benötigt: ${missing.length ? missing.map(length => `${length}er`).join(' · ') : 'Gruppen richtig verbinden'}`;
       validation.classList.toggle('is-valid', check.correct);
       controls.append(validation);
-      const clear = document.createElement('button'); clear.type = 'button'; clear.className = 'secondary-button'; clear.textContent = 'Alle Kästchen entfernen';
-      clear.addEventListener('click', () => { player.customCells = []; player.ships = []; saveShipsGame(); renderShipsGame(); });
-      controls.append(clear);
-      const random = document.createElement('button'); random.type = 'button'; random.className = 'secondary-button'; random.textContent = 'Zufällige Flotte';
-      random.addEventListener('click', () => {
-        const temporary = { ships: [] };
-        randomizeFleet(temporary);
-        player.customCells = [...new Set(temporary.ships.flatMap(occupiedCells))];
-        rebuildShipsFromCells(player); saveShipsGame(); renderShipsGame();
-      });
-      controls.append(random);
       const ready = document.createElement('button'); ready.type = 'button'; ready.className = 'primary-button';
-      ready.textContent = !check.correct ? 'Flotte erst vervollständigen' : (activePlayer === 0 ? 'Spieler 1 fertig – weiter zu Spieler 2' : 'Kampf beginnen →');
+      ready.textContent = activePlayer === 0 ? 'Weiter → Spieler 2' : 'Weiter → Kampf';
       ready.disabled = !check.correct;
       ready.addEventListener('click', () => {
         const currentCheck = fleetCheck(player);
