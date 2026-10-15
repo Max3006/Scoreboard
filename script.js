@@ -26,7 +26,7 @@
     return { columns: 4, rows: 4, seats: BOARD_SEATS.twelve.slice(0, count), center: '2 / 4' };
   };
   const $ = (selector, root = document) => root.querySelector(selector);
-  const views = ['setup-view', 'game-view', 'round-view', 'review-view', 'continue-games-view', 'gamebox-view', 'ships-game-view'].map((id) => document.getElementById(id));
+  const views = ['setup-view', 'game-view', 'round-view', 'review-view', 'continue-games-view'].map((id) => document.getElementById(id));
 
   const makeId = () => globalThis.crypto?.randomUUID?.() || `p-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
   const cleanName = (value, fallback) => {
@@ -102,14 +102,13 @@
       view.classList.toggle('active', active);
     });
     document.body.classList.toggle('game-open', viewId === 'game-view');
-    document.body.classList.toggle('ships-open', viewId === 'ships-game-view');
     document.body.classList.toggle('game-solo-open', viewId === 'game-view' && game?.viewMode === 'solo');
     document.body.classList.toggle('entry-open', viewId === 'round-view');
     $('#new-game-button').hidden = viewId !== 'round-view';
     $('#edit-game-button').hidden = viewId !== 'round-view' || !game;
-    const navVisible = ['setup-view', 'game-view', 'continue-games-view', 'gamebox-view'].includes(viewId);
+    const navVisible = ['setup-view', 'game-view', 'continue-games-view'].includes(viewId);
     $('#app-nav').hidden = !navVisible;
-    document.querySelectorAll('[data-app-view]').forEach((tab) => tab.classList.toggle('active', tab.dataset.appView === (viewId === 'continue-games-view' || viewId === 'gamebox-view' ? viewId : 'setup-view')));
+    document.querySelectorAll('[data-app-view]').forEach((tab) => tab.classList.toggle('active', tab.dataset.appView === (viewId === 'continue-games-view' ? viewId : 'setup-view')));
     if (viewId === 'continue-games-view') renderSavedDigitalGames();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -674,203 +673,6 @@
     $('#edit-player-list').lastElementChild?.querySelector('input')?.focus();
   });
   $('#edit-form').addEventListener('submit', (event) => { if (event.submitter?.id === 'save-edit') saveEdit(event); });
-
-
-  // Schiffe versenken: eigenständiges, lokal gespeichertes Pass-and-Play-Spiel.
-  const SHIPS_STORAGE_KEY = 'rundenheld.ships.v1';
-  const SHIP_TYPES = [
-    { name: 'Flugzeugträger', length: 5 }, { name: 'Schlachtschiff', length: 4 },
-    { name: 'Kreuzer', length: 3 }, { name: 'U-Boot', length: 3 }, { name: 'Zerstörer', length: 2 }
-  ];
-  const SHIP_LETTERS = 'ABCDEFGHIJ';
-  let shipsGame = loadShipsGame();
-  let shipsOrientation = 'h';
-  let selectedShipIndex = 0;
-  function newShipsPlayer(name) { return { name, ships: [], shots: Array(100).fill('') }; }
-  function loadShipsGame() {
-    try {
-      const raw = JSON.parse(localStorage.getItem(SHIPS_STORAGE_KEY) || 'null');
-      if (!raw || !Array.isArray(raw.players) || raw.players.length !== 2 || !['setup','playing','finished'].includes(raw.phase)) return null;
-      return raw;
-    } catch { return null; }
-  }
-  function saveShipsGame() {
-    try { if (shipsGame) localStorage.setItem(SHIPS_STORAGE_KEY, JSON.stringify(shipsGame)); } catch {}
-  }
-  function makeShipsGame() {
-    shipsGame = { phase: 'setup', setupPlayer: 0, turn: 0, winner: null, players: [newShipsPlayer('Spieler 1'), newShipsPlayer('Spieler 2')] };
-    shipsOrientation = 'h'; selectedShipIndex = 0; saveShipsGame(); renderShipsGame();
-  }
-  function occupiedCells(ship) {
-    if (Array.isArray(ship.cells)) return ship.cells;
-    return Array.from({ length: ship.length }, (_, i) => ship.orientation === 'h' ? ship.row * 10 + ship.col + i : (ship.row + i) * 10 + ship.col);
-  }
-  function connectedShipGroups(cells) {
-    const remaining = new Set(cells), groups = [];
-    while (remaining.size) {
-      const first = remaining.values().next().value, group = [], queue = [first];
-      remaining.delete(first);
-      while (queue.length) {
-        const cell = queue.pop(); group.push(cell);
-        const row = Math.floor(cell / 10), col = cell % 10;
-        const neighbors = [];
-        if (row > 0) neighbors.push(cell - 10);
-        if (row < 9) neighbors.push(cell + 10);
-        if (col > 0) neighbors.push(cell - 1);
-        if (col < 9) neighbors.push(cell + 1);
-        neighbors.forEach(next => { if (remaining.has(next)) { remaining.delete(next); queue.push(next); } });
-      }
-      groups.push(group.sort((a,b) => a-b));
-    }
-    return groups;
-  }
-  function rebuildShipsFromCells(player) {
-    const groups = connectedShipGroups(player.customCells || []);
-    const usedTypes = new Set();
-    player.ships = groups.map((cells, index) => {
-      const type = SHIP_TYPES.find(candidate => candidate.length === cells.length && !usedTypes.has(candidate.name));
-      if (type) usedTypes.add(type.name);
-      const first = cells[0];
-      return { name: type?.name || `Bauteil ${index + 1}`, length: cells.length, cells, row: Math.floor(first / 10), col: first % 10, orientation: 'h' };
-    });
-    return groups;
-  }
-  function fleetCheck(player) {
-    const groups = connectedShipGroups(player.customCells || []);
-    const lengths = groups.map(group => group.length).sort((a,b) => b-a);
-    const expected = [5,4,3,3,2];
-    const correct = lengths.length === expected.length && lengths.every((length,index) => length === expected[index]);
-    return { correct, groups, count: (player.customCells || []).length, lengths };
-  }
-  function shipCells(player) {
-    const cells = new Map();
-    player.ships.forEach((ship, i) => occupiedCells(ship).forEach(cell => cells.set(cell, i)));
-    return cells;
-  }
-  function canPlaceShip(player, row, col, length, orientation) {
-    if (orientation === 'h' ? col + length > 10 : row + length > 10) return false;
-    const occupied = shipCells(player);
-    return Array.from({ length }, (_, i) => orientation === 'h' ? row * 10 + col + i : (row + i) * 10 + col).every(cell => !occupied.has(cell));
-  }
-  function randomizeFleet(player) {
-    player.ships = [];
-    for (const type of SHIP_TYPES) {
-      let placed = false, tries = 0;
-      while (!placed && tries++ < 500) {
-        const orientation = Math.random() < .5 ? 'h' : 'v';
-        const row = Math.floor(Math.random() * 10), col = Math.floor(Math.random() * 10);
-        if (canPlaceShip(player, row, col, type.length, orientation)) {
-          player.ships.push({ ...type, row, col, orientation }); placed = true;
-        }
-      }
-    }
-  }
-  function renderShipsGrid(container, player, mode, playerIndex, displayedShots = player.shots) {
-    container.replaceChildren();
-    const occupied = shipCells(player);
-    for (let row = 0; row < 10; row++) for (let col = 0; col < 10; col++) {
-      const index = row * 10 + col, cell = document.createElement('button');
-      cell.type = 'button'; cell.className = 'ships-cell'; cell.dataset.cell = String(index);
-      cell.setAttribute('aria-label', `${SHIP_LETTERS[col]}${row + 1}`);
-      const shipIndex = occupied.get(index);
-      // Gegnerische Schiffe bleiben im Zielraster verborgen; Treffer werden trotzdem angezeigt.
-      if (shipIndex !== undefined && mode !== 'target') {
-        cell.classList.add('has-ship', `ship-kind-${shipIndex}`);
-        if (mode === 'placement') cell.dataset.shipIndex = String(shipIndex);
-      }
-      if (displayedShots[index] === 'hit') { cell.classList.add('shot-hit'); cell.textContent = '✕'; }
-      else if (displayedShots[index] === 'miss') { cell.classList.add('shot-miss'); cell.textContent = '•'; }
-      if (mode === 'placement') cell.title = `${SHIP_LETTERS[col]}${row + 1} platzieren`;
-      else {
-        cell.disabled = mode !== 'target' || displayedShots[index] !== '';
-        if (displayedShots[index] === '') cell.classList.add('targetable');
-      }
-      container.append(cell);
-    }
-    container.dataset.playerIndex = String(playerIndex);
-    container.dataset.mode = mode;
-  }
-  function renderShipsGame() {
-    const root = $('#ships-game-view');
-    if (!root || !shipsGame) return;
-    const status = $('#ships-status'), controls = $('#ships-controls'), boards = $('#ships-boards');
-    boards.replaceChildren(); controls.replaceChildren();
-    const activePlayer = shipsGame.phase === 'setup' ? shipsGame.setupPlayer : shipsGame.turn;
-    if (shipsGame.phase === 'setup') {
-      const player = shipsGame.players[activePlayer];
-      if (!Array.isArray(player.customCells)) player.customCells = [...new Set(player.ships.flatMap(occupiedCells))];
-      const groups = rebuildShipsFromCells(player);
-      const check = fleetCheck(player);
-      status.textContent = 'Schiffe setzen';
-      const validation = document.createElement('p'); validation.className = 'ships-fleet-check';
-      const missing = [5,4,3,3,2];
-      check.lengths.forEach(length => { const index = missing.indexOf(length); if (index >= 0) missing.splice(index, 1); });
-      validation.textContent = check.correct
-        ? '✓ Flotte vollständig – alle Schiffe vorhanden'
-        : `Noch benötigt: ${missing.length ? missing.map(length => `${length}er`).join(' · ') : 'Gruppen richtig verbinden'}`;
-      validation.classList.toggle('is-valid', check.correct);
-      controls.append(validation);
-      const ready = document.createElement('button'); ready.type = 'button'; ready.className = 'primary-button';
-      ready.textContent = activePlayer === 0 ? 'Weiter → Spieler 2' : 'Weiter → Kampf';
-      ready.disabled = !check.correct;
-      ready.addEventListener('click', () => {
-        const currentCheck = fleetCheck(player);
-        if (!currentCheck.correct) return;
-        if (activePlayer === 0) shipsGame.setupPlayer = 1;
-        else { shipsGame.phase = 'playing'; shipsGame.turn = 0; }
-        shipsOrientation = 'h'; selectedShipIndex = 0; saveShipsGame(); renderShipsGame();
-      });
-      controls.append(ready);
-      const gridWrap = document.createElement('section'); gridWrap.className = 'ships-board-wrap';
-      const grid = document.createElement('div'); grid.className = 'ships-grid';
-      renderShipsGrid(grid, player, 'placement', activePlayer);
-      grid.addEventListener('click', event => {
-        const cell = event.target.closest('[data-cell]');
-        if (!cell) return;
-        const index = Number(cell.dataset.cell);
-        const current = new Set(player.customCells || []);
-        if (current.has(index)) current.delete(index);
-        else current.add(index);
-        player.customCells = [...current].sort((a,b) => a-b);
-        rebuildShipsFromCells(player);
-        saveShipsGame(); renderShipsGame();
-      });
-      gridWrap.append(grid); boards.append(gridWrap);
-    } else {
-      const current = shipsGame.players[shipsGame.turn];
-      status.textContent = shipsGame.phase === 'finished' ? `${shipsGame.winner} gewinnt! ⚓` : `${current.name} ist dran – wähle ein Feld auf dem gegnerischen Raster.`;
-      shipsGame.players.forEach((player, index) => {
-        const wrap = document.createElement('section'); wrap.className = 'ships-board-wrap';
-        const title = document.createElement('h2'); title.textContent = index === shipsGame.turn ? `${player.name} · Eigene Flotte` : `${player.name} · Zielraster`;
-        wrap.append(title);
-        const grid = document.createElement('div'); grid.className = 'ships-grid';
-        const isCurrentPlayer = index === shipsGame.turn;
-        const shotsToDisplay = isCurrentPlayer ? shipsGame.players[1 - index].shots : shipsGame.players[shipsGame.turn].shots;
-        renderShipsGrid(grid, player, isCurrentPlayer ? 'own' : 'target', index, shotsToDisplay);
-        if (shipsGame.phase === 'playing' && index !== shipsGame.turn) {
-          grid.addEventListener('click', event => {
-            const cell = event.target.closest('[data-cell]');
-            if (!cell || cell.disabled) return;
-            const cellIndex = Number(cell.dataset.cell), actualTarget = shipsGame.players[index], attacker = shipsGame.players[shipsGame.turn];
-            attacker.shots[cellIndex] = shipCells(actualTarget).has(cellIndex) ? 'hit' : 'miss';
-            if (attacker.shots.filter(value => value === 'hit').length >= 17) { shipsGame.phase = 'finished'; shipsGame.winner = attacker.name; }
-            else shipsGame.turn = index;
-            saveShipsGame(); renderShipsGame();
-          });
-        }
-        wrap.append(grid); boards.append(wrap);
-      });
-      const action = document.createElement('button'); action.type = 'button'; action.className = shipsGame.phase === 'finished' ? 'primary-button' : 'secondary-button';
-      action.textContent = shipsGame.phase === 'finished' ? 'Neue Partie' : 'Partie neu starten';
-      action.addEventListener('click', () => { if (window.confirm('Neue Partie starten? Der aktuelle Spielstand wird ersetzt.')) makeShipsGame(); });
-      controls.append(action);
-    }
-  }
-  document.querySelector('.gamebox-ships')?.addEventListener('click', () => {
-    if (!shipsGame || shipsGame.phase === 'finished') makeShipsGame();
-    else renderShipsGame();
-    showView('ships-game-view');
-  });
 
   let installPrompt;
   window.addEventListener('resize', sizeSideScoreCards);
