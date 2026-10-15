@@ -26,7 +26,7 @@
     return { columns: 4, rows: 4, seats: BOARD_SEATS.twelve.slice(0, count), center: '2 / 4' };
   };
   const $ = (selector, root = document) => root.querySelector(selector);
-  const views = ['setup-view', 'game-view', 'round-view', 'review-view', 'continue-games-view'].map((id) => document.getElementById(id));
+  const views = ['setup-view', 'game-view', 'round-view', 'review-view'].map((id) => document.getElementById(id));
 
   const makeId = () => globalThis.crypto?.randomUUID?.() || `p-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
   const cleanName = (value, fallback) => {
@@ -106,78 +106,16 @@
     document.body.classList.toggle('entry-open', viewId === 'round-view');
     $('#new-game-button').hidden = viewId !== 'round-view';
     $('#edit-game-button').hidden = viewId !== 'round-view' || !game;
-    const navVisible = ['setup-view', 'game-view', 'continue-games-view'].includes(viewId);
+    const navVisible = ['setup-view', 'game-view'].includes(viewId);
     $('#app-nav').hidden = !navVisible;
-    document.querySelectorAll('[data-app-view]').forEach((tab) => tab.classList.toggle('active', tab.dataset.appView === (viewId === 'continue-games-view' ? viewId : 'setup-view')));
-    if (viewId === 'continue-games-view') renderSavedDigitalGames();
+    document.querySelectorAll('[data-app-view]').forEach((tab) => tab.classList.toggle('active', tab.dataset.appView === (viewId === 'game-view' ? 'setup-view' : viewId)));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
 
-  const DIGITAL_GAMES_KEY = 'rundenheld.digitalGames.v1';
-  function loadSavedDigitalGames() {
-    try {
-      const value = JSON.parse(localStorage.getItem(DIGITAL_GAMES_KEY) || '[]');
-      return Array.isArray(value) ? value.filter((item) => item && typeof item.id === 'string' && typeof item.title === 'string').slice(0, 3) : [];
-    } catch { return []; }
-  }
-  function renderSavedDigitalGames() {
-    const list = $('#saved-games-list');
-    if (!list) return;
-    const saved = loadSavedDigitalGames();
-    list.replaceChildren();
-
-    // The main Scoreboard game is saved separately; show it here as a real resumable game.
-    const resumableScoreGame = game && !game.finished;
-    if (resumableScoreGame) {
-      const card = document.createElement('article'); card.className = 'saved-game-card';
-      const details = document.createElement('div'); details.className = 'saved-game-details';
-      const title = document.createElement('h2'); title.textContent = 'Punktespiel';
-      const players = document.createElement('p');
-      players.textContent = game.players.map((player) => player.name).join(' · ');
-      const progress = document.createElement('p');
-      progress.textContent = game.endMode === 'rounds'
-        ? `Runde ${Math.min(game.roundNumber, game.limit)} von ${game.limit}`
-        : `Runde ${game.roundNumber}`;
-      details.append(title, players, progress);
-      const resume = document.createElement('button'); resume.type = 'button'; resume.className = 'primary-button'; resume.textContent = 'Fortsetzen';
-      resume.addEventListener('click', () => { renderGame(); showView('game-view'); });
-      card.append(details, resume); list.append(card);
-    }
-
-    saved.forEach((item) => {
-      const card = document.createElement('article'); card.className = 'saved-game-card';
-      const title = document.createElement('h2'); title.textContent = item.title;
-      const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'secondary-button'; remove.textContent = 'Löschen';
-      remove.addEventListener('click', () => {
-        const next = loadSavedDigitalGames().filter((entry) => entry.id !== item.id);
-        try { localStorage.setItem(DIGITAL_GAMES_KEY, JSON.stringify(next)); } catch {}
-        renderSavedDigitalGames();
-      });
-      card.append(title, remove); list.append(card);
-    });
-
-    const count = (resumableScoreGame ? 1 : 0) + saved.length;
-    const countBadge = $('#saved-game-count');
-    if (countBadge) {
-      countBadge.hidden = count === 0;
-      countBadge.textContent = String(count);
-    }
-    if (count === 0) {
-      const empty = document.createElement('div'); empty.className = 'saved-games-empty';
-      const title = document.createElement('h2'); title.textContent = 'Noch keine angefangenen Spiele';
-      const copy = document.createElement('p'); copy.textContent = 'Dein laufendes Punktespiel erscheint hier automatisch. Weitere Spiele kommen dazu, sobald sie in der Spielekiste spielbar sind.';
-      empty.append(title, copy); list.append(empty);
-    }
-  }
   document.querySelectorAll('[data-app-view]').forEach((tab) => tab.addEventListener('click', () => {
-    const target = tab.dataset.appView;
-    if (target === 'setup-view') {
-      // The Scoreboard tab always returns to the landing/setup screen.
-      // Resume an existing score game explicitly from the Fortfahren tab.
-      renderSetupPlayers();
-      showView('setup-view');
-    } else showView(target);
+    if (game) { renderGame(); showView('game-view'); }
+    else { renderSetupPlayers(); showView('setup-view'); }
   }));
 
   function makePlayerRow(player, index, onRemove, canRemove = true) {
@@ -688,8 +626,6 @@
   }
 
   renderSetupPlayers();
-  // Always open on the landing page with the three main tabs visible.
-  // The saved score game remains intact and is available from the Scoreboard tab.
-  if (game) renderGame();
-  showView('setup-view');
+  if (game) { renderGame(); showView('game-view'); }
+  else showView('setup-view');
 })();
