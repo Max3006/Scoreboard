@@ -10,8 +10,8 @@
   <meta name="description" content="Ein einfacher Punktzähler für Max und seine Spieleabend-Runde.">
   <title>Scoreboard</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="style.css?v=43">
-  <script src="script.js?v=60" defer></script>
+  <link rel="stylesheet" href="style.css?v=44">
+  <script src="script.js?v=61" defer></script>
 </head>
 <body>
   <main class="app-shell">
@@ -21,7 +21,7 @@
     </header>
     <nav class="app-nav" id="app-nav" aria-label="Hauptnavigation">
       <button type="button" class="app-nav-tab active" data-app-view="setup-view"><span class="app-nav-icon" aria-hidden="true">▦</span><span>Scoreboard</span></button>
-      <button type="button" class="app-nav-tab" data-app-view="continue-games-view"><span class="app-nav-icon" aria-hidden="true">▶</span><span>Fortfahren</span><span class="nav-count" id="saved-game-count" hidden>0</span></button>
+
 
     </nav>
     <section class="view active" id="setup-view" aria-labelledby="setup-title">
@@ -76,10 +76,6 @@
       <button class="secondary-button" id="back-to-entry" type="button">Eingaben fortsetzen</button>
     </section>
 
-    <section class="view collection-view" id="continue-games-view" aria-labelledby="continue-games-title" hidden>
-      <div class="hero"><p class="eyebrow">DEINE SPIELE</p><h1 id="continue-games-title">Fortfahren</h1><p class="intro">Bis zu drei angefangene Spiele aufbewahren und später genau dort weiterspielen.</p></div>
-      <div class="saved-games-list panel" id="saved-games-list" aria-live="polite"></div>
-    </section>
 
     <footer class="site-footer"><span>Max’ Spieleabend</span><span>Punkte statt Blockpapier.</span></footer>
   </main>
