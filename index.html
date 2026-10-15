@@ -10,8 +10,8 @@
   <meta name="description" content="Ein einfacher Punktzähler für Max und seine Spieleabend-Runde.">
   <title>Scoreboard</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="style.css?v=42">
-  <script src="script.js?v=59" defer></script>
+  <link rel="stylesheet" href="style.css?v=43">
+  <script src="script.js?v=60" defer></script>
 </head>
 <body>
   <main class="app-shell">
@@ -22,7 +22,7 @@
     <nav class="app-nav" id="app-nav" aria-label="Hauptnavigation">
       <button type="button" class="app-nav-tab active" data-app-view="setup-view"><span class="app-nav-icon" aria-hidden="true">▦</span><span>Scoreboard</span></button>
       <button type="button" class="app-nav-tab" data-app-view="continue-games-view"><span class="app-nav-icon" aria-hidden="true">▶</span><span>Fortfahren</span><span class="nav-count" id="saved-game-count" hidden>0</span></button>
-      <button type="button" class="app-nav-tab" data-app-view="gamebox-view"><span class="app-nav-icon" aria-hidden="true">✦</span><span>Spielekiste</span></button>
+
     </nav>
     <section class="view active" id="setup-view" aria-labelledby="setup-title">
       <div class="hero"><p class="eyebrow">MAX’ RUNDE · SPIELEABEND</p><h1 id="setup-title">Scoreboard</h1><p class="intro">Namen eintragen, Punkte sammeln und den Überblick behalten. Ganz ohne Blockpapier.</p></div>
@@ -80,21 +80,7 @@
       <div class="hero"><p class="eyebrow">DEINE SPIELE</p><h1 id="continue-games-title">Fortfahren</h1><p class="intro">Bis zu drei angefangene Spiele aufbewahren und später genau dort weiterspielen.</p></div>
       <div class="saved-games-list panel" id="saved-games-list" aria-live="polite"></div>
     </section>
-    <section class="view collection-view" id="gamebox-view" aria-labelledby="gamebox-title" hidden>
-      <div class="hero"><p class="eyebrow">OFFLINE · GEMEINSAM SPIELEN</p><h1 id="gamebox-title">Spielekiste</h1><p class="intro">Kleine Spiele für einen Tisch, ein Handy und mehrere Leute.</p></div>
-      <div class="gamebox-grid">
-        <article class="gamebox-card gamebox-ships"><div class="gamebox-art" aria-hidden="true"><span>🚢</span><span>🌊</span><span>🚢</span></div><div class="gamebox-card-copy"><p class="eyebrow">ALS ERSTES GEPLANT</p><h2>Schiffe versenken</h2><p>Ein Klassiker für zwei Spieler – direkt auf einem Handy.</p><button type="button" class="primary-button ships-start-button">Jetzt spielen <span aria-hidden="true">→</span></button></div></article>
-        <article class="gamebox-card gamebox-coming"><div class="gamebox-art" aria-hidden="true"><span>🎲</span><span>✨</span><span>🎲</span></div><div class="gamebox-card-copy"><p class="eyebrow">WEITERE SPIELE</p><h2>Deine nächste Runde</h2><p>Hier kommen weitere Spiele dazu, die sich auf dem Handy wirklich gut spielen lassen.</p><span class="gamebox-status">Weitere Spiele folgen</span></div></article>
-      </div>
-    </section>
 
-    <section class="view collection-view ships-game-view" id="ships-game-view" aria-labelledby="ships-game-title" hidden>
-      <div class="ships-game-top"><span class="ships-kicker">2 SPIELER · OFFLINE</span></div>
-      <div class="hero"><p class="eyebrow">TAKTIK &amp; TREFFER</p><h1 id="ships-game-title">Schiffe versenken</h1><p class="intro">Platziert eure Flotten und feuert abwechselnd. Treffer und Wasser werden direkt markiert.</p></div>
-      <div class="ships-status" id="ships-status" aria-live="polite">Spiel wird vorbereitet …</div>
-      <div class="ships-controls" id="ships-controls"></div>
-      <div class="ships-boards" id="ships-boards"></div>
-    </section>
     <footer class="site-footer"><span>Max’ Spieleabend</span><span>Punkte statt Blockpapier.</span></footer>
   </main>
   <dialog id="edit-dialog" class="edit-dialog"><form method="dialog" id="edit-form"><div class="dialog-heading"><div><p class="eyebrow">SPIEL ANPASSEN</p><h2>Spieler verwalten</h2></div><button class="icon-button close-dialog" value="cancel" aria-label="Schließen">×</button></div><div id="edit-player-list" class="player-list"></div>
