@@ -16,7 +16,7 @@
   };
   const THREE_PLAYER_LAYOUTS = {
     normal: { columns: 2, rows: 2, seats: [[2, 2], [2, 1], [1, 1]] },
-    corner: { columns: 3, rows: 2, columnTemplate: 'minmax(0, .62fr) repeat(2, minmax(0, 1fr))', seats: [[2, 3], [2, 2], ['1 / span 2', 1]], sideIndexes: [2] },
+    corner: { columns: 2, rows: 2, columnTemplate: 'minmax(0, .62fr) minmax(0, 1fr)', seats: [[2, 2], ['1 / span 2', 1], [1, 2]], sideIndexes: [1] },
   };
   const DEFAULT_THREE_LAYOUT = 'normal';
   const LEGACY_THREE_LAYOUTS = { left: 'normal', right: 'normal' };
