@@ -1205,3 +1205,7 @@ body.game-solo-open #game-view .score-grid { left: calc(env(safe-area-inset-left
 .gamebox-card-copy p:not(.eyebrow){margin:0 0 12px;color:var(--muted);font-size:.84rem;line-height:1.45}
 .gamebox-status{display:inline-flex;padding:6px 9px;border-radius:99px;background:#f0f2f7;color:#555f72;font-size:.7rem;font-weight:700}
 @media(max-width:520px){.app-nav{gap:5px;padding:5px;border-radius:17px;margin-bottom:18px}.app-nav-tab{min-height:58px;font-size:.7rem}.gamebox-grid{grid-template-columns:1fr}.gamebox-art{min-height:92px}.saved-game-card{align-items:flex-start}}
+
+
+/* Three-player seating: use the middle left/right cells as outer table seats. */
+#game-view .score-grid[data-player-count="3"] .score-card-side { position: relative; padding: 4px 2px; }
