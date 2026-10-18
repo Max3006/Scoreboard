@@ -12,11 +12,11 @@
     twelve: [[4, 4], [4, 3], [4, 2], [4, 1], [3, 1], [2, 1], [1, 1], [1, 2], [1, 3], [1, 4], [2, 4], [3, 4]],
   };
   const THREE_SEAT_POSITIONS = {
-    tl: [1, 1], tr: [1, 3], left: [2, 1], right: [2, 3], bl: [3, 1], br: [3, 3],
+    tl: [1, 1], tr: [1, 2], left: [2, 1], right: [2, 3], bl: [2, 2], br: [2, 3],
   };
   const THREE_PLAYER_LAYOUTS = {
-    normal: ['tl', 'bl', 'br'],
-    corner: ['tl', 'left', 'bl'],
+    normal: { columns: 2, rows: 2, seats: [[2, 2], [2, 1], [1, 1]] },
+    corner: { columns: 3, rows: 2, columnTemplate: 'minmax(0, .62fr) repeat(2, minmax(0, 1fr))', seats: [[2, 3], [2, 2], ['1 / span 2', 1]], sideIndexes: [2] },
   };
   const DEFAULT_THREE_LAYOUT = 'normal';
   const LEGACY_THREE_LAYOUTS = { left: 'normal', right: 'normal' };
@@ -43,8 +43,8 @@
   const boardLayout = (count, threeLayout = DEFAULT_THREE_LAYOUT, fifthSide = 'right') => {
     if (count === 2) return { columns: 2, rows: 2, seats: [[1, '1 / 3'], [2, '1 / 3']], center: 'overlay' };
     if (count === 3) {
-      const seats = THREE_PLAYER_LAYOUTS[normalizeThreeLayout(threeLayout)];
-      return { columns: 3, rows: 3, seats: seats.map((seat) => THREE_SEAT_POSITIONS[seat]), center: 'overlay', sideIndexes: seats.map((seat, index) => ['left', 'right'].includes(seat) ? index : -1).filter((index) => index >= 0) };
+      const selected = THREE_PLAYER_LAYOUTS[normalizeThreeLayout(threeLayout)];
+      return { ...selected, center: 'overlay' };
     }
     if (count === 4) return { columns: 2, rows: 2, seats: BOARD_SEATS.four, center: 'overlay' };
     if (count === 5) {
