@@ -46,7 +46,7 @@
       const selected = THREE_PLAYER_LAYOUTS[normalizeThreeLayout(threeLayout)];
       return { ...selected, center: 'overlay' };
     }
-    if (count === 4) return fourLayout === 'cross' ? { columns: 2, rows: 2, seats: BOARD_SEATS.four, center: 'overlay', crossIndexes: [0, 1, 2, 3] } : { columns: 2, rows: 2, seats: BOARD_SEATS.four, center: 'overlay' };
+    if (count === 4) return fourLayout === 'cross' ? { columns: 3, rows: 2, columnTemplate: 'minmax(0, .62fr) minmax(0, 1fr) minmax(0, .62fr)', seats: [[2, 2], ['1 / span 2', 1], [1, 2], ['1 / span 2', 3]], center: 'overlay', sideIndexes: [1, 3] } : { columns: 2, rows: 2, seats: BOARD_SEATS.four, center: 'overlay' };
     if (count === 5) {
       const sideColumn = fifthSide === 'left' ? 1 : 3;
       const leftColumn = fifthSide === 'left' ? 2 : 1;
@@ -275,7 +275,7 @@
         const inner = document.createElement('div'); inner.className = 'score-card-content-inner';
         inner.append(top, total, bottom); content.append(inner); card.append(content);
       } else if (layout.sideIndexes?.includes(index)) {
-        const side = game.players.length === 5 ? game.fifthSide : (index === 2 ? 'left' : 'right');
+        const side = game.players.length === 5 ? game.fifthSide : (game.players.length === 4 ? (index === 1 ? 'left' : 'right') : (index === 2 ? 'left' : 'right'));
         card.classList.add(`score-card-side-${side}`);
         card.style.setProperty('--side-rotation', side === 'left' ? '-90deg' : '90deg');
         const content = document.createElement('div'); content.className = 'score-card-content';
