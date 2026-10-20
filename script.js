@@ -215,13 +215,19 @@
   let setupPlayers = defaultPlayers();
 
   function sizeSideScoreCards() {
-    document.querySelectorAll('#game-view .score-card-side').forEach((card) => {
+    document.querySelectorAll('#game-view .score-card-side, #game-view .score-card-cross').forEach((card) => {
       const inner = card.querySelector('.score-card-content-inner');
       if (!inner || !card.clientWidth || !card.clientHeight) return;
-      // Give the content the card's dimensions swapped before rotating it.
-      // This avoids relying on container query units on mobile browsers.
+      // Rotated seat labels use the swapped card dimensions to stay inside their quadrant.
       inner.style.width = `${card.clientHeight}px`;
       inner.style.height = `${card.clientWidth}px`;
+      if (card.classList.contains('score-card-cross')) {
+        const seat = Number([...card.classList].find((name) => /^score-card-cross-[1-4]$/.test(name))?.slice(-1)) || 1;
+        inner.style.position = 'absolute';
+        inner.style.top = '50%';
+        inner.style.left = '50%';
+        inner.style.transform = `translate(-50%, -50%) rotate(${[0, 90, 180, 270][seat - 1]}deg)`;
+      }
     });
   }
 
