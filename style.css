@@ -1215,11 +1215,7 @@ body.game-solo-open #game-view .score-grid { left: calc(env(safe-area-inset-left
 #game-view .score-grid[data-layout="four-cross"] { gap: 0 !important; padding: 0 !important; }
 #game-view .score-grid[data-layout="four-cross"] .score-card { position: relative; min-width: 0; min-height: 0; margin: 0; border: 0; border-radius: 0; box-shadow: none; overflow: hidden; }
 #game-view .score-grid[data-layout="four-cross"] .score-card-cross .score-card-content { position: absolute; inset: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-#game-view .score-grid[data-layout="four-cross"] .score-card-cross .score-card-content-inner { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(2px, .7vh, 8px); padding: clamp(3px, 1vw, 12px); transform-origin: center; }
-#game-view .score-grid[data-layout="four-cross"] .score-card-cross-1 .score-card-content-inner { transform: rotate(0deg); }
-#game-view .score-grid[data-layout="four-cross"] .score-card-cross-2 .score-card-content-inner { transform: rotate(90deg); }
-#game-view .score-grid[data-layout="four-cross"] .score-card-cross-3 .score-card-content-inner { transform: rotate(180deg); }
-#game-view .score-grid[data-layout="four-cross"] .score-card-cross-4 .score-card-content-inner { transform: rotate(270deg); }
+#game-view .score-grid[data-layout="four-cross"] .score-card-cross .score-card-content-inner { position: absolute; top: 50%; left: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(2px, .7vh, 8px); padding: clamp(3px, 1vw, 12px); transform-origin: center; }
 #game-view .score-grid[data-layout="four-cross"] .score-card-top { justify-content: center; gap: 5px; }
 #game-view .score-grid[data-layout="four-cross"] .score-name { max-width: 80%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #game-view .score-grid[data-layout="four-cross"] .score-value { max-width: 100%; margin: 0; overflow: visible; white-space: nowrap; font-size: clamp(1rem, min(5.5vw, 9vh), 3.4rem); }
