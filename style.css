@@ -1220,3 +1220,21 @@ body.game-solo-open #game-view .score-grid { left: calc(env(safe-area-inset-left
 #game-view .score-grid[data-layout="four-cross"] .score-name { max-width: 80%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #game-view .score-grid[data-layout="four-cross"] .score-value { max-width: 100%; margin: 0; overflow: visible; white-space: nowrap; font-size: clamp(1rem, min(5.5vw, 9vh), 3.4rem); }
 #game-view .score-grid[data-layout="four-cross"] .score-card-bottom { display: none; }
+
+/* Four-player cross layout: fill the board edge-to-edge while retaining the center touch zone. */
+#game-view .score-grid[data-layout="four-cross"] {
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  gap: 0 !important;
+  padding: 0 !important;
+}
+#game-view .score-grid[data-layout="four-cross"] > .score-card {
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
