@@ -10,8 +10,8 @@
   <meta name="description" content="Ein einfacher Punktzähler für Max und seine Spieleabend-Runde.">
   <title>Scoreboard</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="style.css?v=45">
-  <script src="script.js?v=66" defer></script>
+  <link rel="stylesheet" href="style.css?v=46">
+  <script src="script.js?v=67" defer></script>
 </head>
 <body>
   <main class="app-shell">
@@ -31,6 +31,7 @@
         <div id="player-list" class="player-list"></div>
         <button class="secondary-button" id="reset-player-appearance" type="button" title="Spielernamen und Farben auf Standard zurücksetzen">Namen &amp; Farben zurücksetzen</button>
         <div class="option-detail board-layout-choice" id="setup-three-layout" hidden><label for="setup-solo-side">Sitzordnung (3 Spieler)</label><select id="setup-solo-side" aria-label="Sitzordnung für drei Spieler"></select></div>
+        <div class="option-detail board-layout-choice" id="setup-four-layout" hidden><label for="setup-four-side">Sitzordnung (4 Spieler)</label><select id="setup-four-side" aria-label="Sitzordnung für vier Spieler"><option value="normal">Standard</option><option value="cross">Kreuzförmig</option></select></div>
         <div class="option-detail board-layout-choice" id="setup-five-layout" hidden><label for="setup-fifth-side">Position von Spieler 5</label><select id="setup-fifth-side"><option value="right" selected>Rechts</option><option value="left">Links</option></select></div>
         <button class="add-player" id="add-player" type="button"><span aria-hidden="true">＋</span> Spieler hinzufügen</button>
         <div class="divider"></div>
@@ -83,6 +84,7 @@
     <button class="secondary-button" id="edit-reset-player-appearance" type="button" title="Spielernamen und Farben auf Standard zurücksetzen">Namen &amp; Farben zurücksetzen</button>
     <div class="option-detail board-view-choice"><label for="edit-view-mode">Ansicht</label><select id="edit-view-mode"><option value="table">Tischansicht (Querformat)</option><option value="solo">Einzelansicht (Hochformat)</option></select></div>
     <div class="option-detail board-layout-choice" id="edit-three-layout" hidden><label for="edit-solo-side">Sitzordnung (3 Spieler)</label><select id="edit-solo-side" aria-label="Sitzordnung für drei Spieler"></select></div>
+    <div class="option-detail board-layout-choice" id="edit-four-layout" hidden><label for="edit-four-side">Sitzordnung (4 Spieler)</label><select id="edit-four-side" aria-label="Sitzordnung für vier Spieler"><option value="normal">Standard</option><option value="cross">Kreuzförmig</option></select></div>
     <div class="option-detail board-layout-choice" id="edit-five-layout" hidden><label for="edit-fifth-side">Position von Spieler 5</label><select id="edit-fifth-side"><option value="right">Rechts</option><option value="left">Links</option></select></div>
     <button class="add-player" id="edit-add-player" type="button"><span aria-hidden="true">＋</span> Spieler hinzufügen</button><div class="dialog-actions"><button class="secondary-button" value="cancel">Abbrechen</button><button class="primary-button" id="save-edit" value="save">Änderungen speichern</button></div></form></dialog>
   <dialog id="continue-dialog" class="edit-dialog"><form id="continue-form"><div class="dialog-heading"><div><p class="eyebrow">RUNDE GEHT WEITER</p><h2>Was ist das neue Ziel?</h2></div><button class="icon-button close-dialog" id="continue-close" type="button" aria-label="Schließen">×</button></div><fieldset class="end-options continue-options"><legend>Weiterzählen bis …</legend>
